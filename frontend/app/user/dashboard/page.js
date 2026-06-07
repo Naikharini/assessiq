@@ -1,12 +1,14 @@
-user/dashboard/page
- 
-import DashboardNavbar from "@/components/user/DashboardNavbar";
-import DashboardSidebar from "@/components/user/DashboardSidebar";
-import StatsCard from "@/components/user/StatsCard";
-import AssessmentCard from "@/components/user/AssessmentCard";
-import WelcomeBanner from "@/components/user/WelcomeBanner";
- 
+
+ "use client";
+import { useRouter } from "next/navigation";
+
+import DashboardNavbar from "../../components/user/DashboardNavbar";
+import DashboardSidebar from "../../components/user/DashboardSidebar";
+import StatsCard from "../../components/user/StatsCard";
+import AssessmentCard from "../../components/user/AssessmentCard";
+import WelcomeBanner from "../../components/user/WelcomeBanner";
 export default function Dashboard() {
+    const router = useRouter();
   return (
     <div className="min-h-screen bg-slate-50">
       <DashboardNavbar />
@@ -17,7 +19,7 @@ export default function Dashboard() {
         <div className="flex-1">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-5xl font-bold">
+              <h1 className="text-5xl  text-black font-bold">
                 Welcome Back!
               </h1>
  
@@ -26,8 +28,10 @@ export default function Dashboard() {
               </p>
             </div>
  
-            <button className="bg-blue-600 text-white px-6 py-3 rounded-xl">
-              + New Assessment
+            <button
+            onClick={() => router.push("/user/assessment")}
+            className="bg-blue-600 text-white px-6 py-3 rounded-xl">
+            + New Assessment
             </button>
           </div>
  
@@ -55,7 +59,7 @@ export default function Dashboard() {
             <WelcomeBanner />
           </div>
  
-          <h2 className="text-3xl font-bold mt-10 mb-6">
+          <h2 className="text-3xl text-black font-bold mt-10 mb-6">
             Recent Assessments
           </h2>
  

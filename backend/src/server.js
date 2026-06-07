@@ -1,9 +1,23 @@
-require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
 
-const app = require("./app");
+const authRoutes = require("./routes/authRoutes");
 
-const PORT = process.env.PORT || 5000;
+const app = express();
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true
+}));
+
+app.use(express.json()); // MUST be before routes
+
+app.get("/", (req, res) => {
+  res.send("Server running");
+});
+
+app.use("/api/auth", authRoutes);
+
+app.listen(5000, () => {
+  console.log("Server running on port 5000");
 });

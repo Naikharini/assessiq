@@ -1,25 +1,69 @@
 "use client";
- 
-import Link from "next/link";
-import Image from "next/image";
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
- 
-export default function UserSignup() {
+import Image from "next/image";
+import Link from "next/link";
+
+export default function Signup() {
   const router = useRouter();
- 
-  const handleSignup = (e) => {
-    e.preventDefault();
- 
-    // Later connect API here
-    console.log("Signup Successful");
- 
-    router.push("/user/home");
+
+  const [form, setForm] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
- 
+
+  const handleSignup = async (e) => {
+  e.preventDefault();
+
+  if (form.password !== form.confirmPassword) {
+    alert("Passwords not match");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: form.fullName,
+        email: form.email,
+        password: form.password
+      })
+    });
+
+    const data = await res.json();
+
+    // ❌ STOP if backend fails
+    if (!res.ok || !data.success) {
+      alert(data.message || "Signup failed");
+      return;
+    }
+
+    console.log("Signup success:", data);
+
+    // ✅ redirect ONLY after success
+    router.push("/user/login");
+
+  } catch (err) {
+    console.log(err);
+    alert("Server error");
+  }
+};
+
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
+
       <div className="w-full max-w-md bg-white rounded-3xl shadow-lg p-8">
- 
+
         {/* Logo */}
         <div className="flex justify-center mb-6">
           <Image
@@ -30,110 +74,111 @@ export default function UserSignup() {
             priority
           />
         </div>
- 
+
         {/* Heading */}
         <div className="text-center">
           <h1 className="text-3xl font-bold text-slate-900">
             Create Account
           </h1>
- 
+
           <p className="text-slate-500 mt-2">
-            Join AssessIQ and start your learning journey
+            Sign up to continue to AssessIQ
           </p>
         </div>
- 
-        {/* Signup Form */}
+
+        {/* FORM */}
         <form onSubmit={handleSignup} className="mt-8 space-y-5">
- 
+
           {/* Full Name */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Full Name
             </label>
- 
+
             <input
               type="text"
+              name="fullName"
               placeholder="Enter your full name"
+              className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
- 
+
           {/* Email */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
+              Email
             </label>
- 
+
             <input
               type="email"
+              name="email"
               placeholder="Enter your email"
+              className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
- 
+
           {/* Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
- 
+
             <input
               type="password"
-              placeholder="Create a password"
+              name="password"
+              placeholder="Enter your password"
+              className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
- 
+
           {/* Confirm Password */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Confirm Password
             </label>
- 
+
             <input
               type="password"
+              name="confirmPassword"
               placeholder="Confirm your password"
+              className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
- 
-          {/* Submit Button */}
+
+          {/* Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-sm font-medium transition"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition"
           >
-            Create Account
+            Signup
           </button>
- 
         </form>
- 
-        {/* Login Link */}
+
+        {/* Login */}
         <div className="text-center mt-6">
           <p className="text-gray-600">
             Already have an account?{" "}
-            <Link
-              href="/user/login"
-              className="text-blue-600 font-medium hover:underline"
-            >
+            <Link href="/user/login" className="text-blue-600 font-medium hover:underline">
               Login
             </Link>
           </p>
         </div>
- 
-        {/* Back to Home */}
+
+        {/* Back */}
         <div className="text-center mt-4">
-          <Link
-            href="/"
-            className="text-sm text-gray-500 hover:text-blue-600"
-          >
+          <Link href="/" className="text-sm text-gray-500 hover:text-blue-600">
             ← Back to Home
           </Link>
         </div>
- 
+
       </div>
     </div>
   );
