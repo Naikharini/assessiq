@@ -41,16 +41,12 @@ export default function Signup() {
     });
 
     const data = await res.json();
-
-    // ❌ STOP if backend fails
     if (!res.ok || !data.success) {
       alert(data.message || "Signup failed");
       return;
     }
 
     console.log("Signup success:", data);
-
-    // ✅ redirect ONLY after success
     router.push("/user/login");
 
   } catch (err) {
