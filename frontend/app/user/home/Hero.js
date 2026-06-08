@@ -17,7 +17,7 @@ export default function Hero() {
   const router = useRouter();
  
   return (
-    <section className="min-h-screen bg-slate-50 py-10">
+    <section className=" bg-slate-50 p-8 mt-5">
  
       {/* Back to Home */}
       <div className="pl-6">
