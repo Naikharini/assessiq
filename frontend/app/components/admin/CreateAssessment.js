@@ -1,0 +1,537 @@
+"use client";
+import { useState } from "react";
+import { Plus, Trash2, Save, Eye, Send, ChevronDown } from "lucide-react";
+const DEPARTMENTS = ["Engineering", "Product", "Design", "Data Science",
+    "Marketing", "Operations", "HR"];
+const DIFFICULTIES = ["Easy", "Medium", "Hard", "Expert"];
+const CORRECT_OPTIONS = ["A", "B", "C", "D"];
+function emptyQuestion() {
+    return {
+        id: Date.now(), question: "", optionA: "", optionB: "", optionC: "",
+        optionD: "", correct: "A", difficulty: "Easy", points: 5
+    };
+}
+export default function CreateAssessment() {
+    const [form, setForm] = useState({
+        name: "", jobRole: "", department: "Engineering", difficulty: "Medium", duration: 45, passingScore: 70, description: "", instructions: "",
+        scheduleDate: "", assignTo: "",
+    });
+    const [questions, setQuestions] = useState([emptyQuestion()]);
+    const [activeQ, setActiveQ] = useState(0);
+    const [published, setPublished] = useState(false);
+    const [deptOpen, setDeptOpen] = useState(false);
+    const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
+    const setQField = (idx, k, v) => setQuestions(qs => qs.map((q, i) => i === idx
+        ? { ...q, [k]: v } : q));
+    const addQuestion = () => {
+        const nq = emptyQuestion();
+        setQuestions(qs => [...qs, nq]);
+        setActiveQ(questions.length);
+    };
+    const deleteQuestion = (idx) => {
+        if (questions.length === 1) return;
+        setQuestions(qs => qs.filter((_, i) => i !== idx));
+        setActiveQ(Math.max(0, idx - 1));
+    };
+    const handlePublish = () => {
+        if (!form.name) {
+            alert("Please enter an assessment name.");
+            return;
+        }
+
+        if (questions.some((q) => !q.question)) {
+            alert("All questions must have text.");
+            return;
+        }
+
+        setPublished(true);
+    };
+    const currentQ = questions[activeQ];
+    if (published) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-
+4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center
+justify-center p-4">
+                    <Send size={28} className="text-green-600" />
+                </div>
+                <h2 className="text-xl font-bold text-slate-800">Assessment
+                    Published!</h2>
+                <p className="text-slate-500 text-sm">
+                    "{form.name}" has been published successfully.
+                </p>
+
+                <button
+                    onClick={() => {
+                        setPublished(false);
+
+                        setForm({
+                            name: "",
+                            jobRole: "",
+                            department: "Engineering",
+                            difficulty: "Medium",
+                            duration: 45,
+                            passingScore: 70,
+                            description: "",
+                            instructions: "",
+                            scheduleDate: "",
+                            assignTo: "",
+                        });
+
+                        setQuestions([emptyQuestion()]);
+                        setActiveQ(0);
+                    }}
+                    className="mt-2 px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                >
+                    Create Another Assessment
+                </button>
+
+            </div>
+        );
+    }
+    return (
+        <div className="flex gap-5">
+            {/* Main form */}
+            <div className="flex-1 min-w-0 space-y-5 p-4">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-xl font-bold text-slate-800">Create AI
+                            Assessment</h1>
+                        <p className="text-sm text-slate-500 mt-0.5">Build MCQ-based
+                            assessments for your candidates.</p>
+                    </div>
+                    <div className="flex items-center gap-2 p-5">
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 border
+border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-
+colors">
+                            <Save size={14} /> Save Draft
+                        </button>
+                        <button className="flex items-center gap-1.5 px-3 py-1.5 border
+border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-
+colors">
+                            <Eye size={14} /> Preview
+                        </button>
+                        <button
+                            onClick={handlePublish}
+                            className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 text-
+white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                        >
+                            <Send size={14} /> Publish
+                        </button>
+                    </div></div>
+                {/* Assessment Details card */}
+                <div className="bg-white rounded-xl border gap-4 border-slate-100 shadow-sm align-center p-5">
+                    <h2 className="text-sm font-semibold  text-slate-700 mt-1 mb-4">Assessment
+                        Details</h2>
+                    <div className="grid grid-cols-2 gap-4 px-4 py-4">
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">Assessment
+                                Name</label>
+                            <input
+                                value={form.name}
+                                onChange={e => setField("name", e.target.value)}
+                                placeholder="e.g. Senior React Engineer Screen"
+                                className="w-full px-3 py-2 text-sm text-gray-600 border border-slate-200
+rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">Job
+                                Role</label>
+                            <input
+                                value={form.jobRole}
+                                onChange={e => setField("jobRole", e.target.value)}
+                                placeholder="Frontend Engineer"
+                                className="w-full px-3 py-2 text-sm text-gray-600 border border-slate-200
+rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        {/* Department */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-
+1">Department</label>
+                            <div className="relative">
+                                <button
+                                    type="button"
+                                    onClick={() => setDeptOpen(!deptOpen)}
+                                    className="w-full flex items-center justify-between px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white hover:bg-slate-50 focus:outline-none"
+                                >
+                                    <span className="text-slate-700">{form.department}</span>
+                                    <ChevronDown size={14} className="text-slate-400" />
+                                </button>
+
+                                {deptOpen && (
+                                    <div className="absolute top-full mt-1 left-0 w-full bg-white border border-slate-200 rounded-lg shadow-lg z-10">
+                                        {DEPARTMENTS.map((d) => (
+                                            <button
+                                                key={d}
+                                                type="button"
+                                                onClick={() => {
+                                                    setField("department", d);
+                                                    setDeptOpen(false);
+                                                }}
+                                                className={`block w-full text-left px-3 py-2 text-sm hover:bg-slate-50 ${form.department === d
+                                                        ? "bg-blue-50 text-blue-600 font-medium"
+                                                        : "text-gray-700"
+                                                    }`}
+                                            >
+                                                {d}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        {/* Difficulty buttons */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">
+                                Difficulty
+                            </label>
+
+                            <div className="flex gap-2">
+                                {DIFFICULTIES.map((d) => (
+                                    <button
+                                        key={d}
+                                        type="button"
+                                        onClick={() => setField("difficulty", d)}
+                                        className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${form.difficulty === d
+                                                ? "bg-blue-600 text-"
+                                                : "bg-slate-100 text-gray-600 hover:bg-slate-200"
+                                            }`}
+                                    >
+                                        {d}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Duration */}
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">
+                                Duration (minutes)
+                            </label>
+
+                            <input
+                                type="number"
+                                min={1}
+                                value={form.duration}
+                                onChange={(e) => setField("duration", e.target.value)}
+                                className="w-full px-3 py-2 text-sm border text-gray-500 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">Passing Score
+                                (%)</label><input
+                                type="number" min={0} max={100}
+                                value={form.passingScore}
+                                onChange={e => setField("passingScore", e.target.value)}
+                                className="w-full px-3 py-2 text-sm border text-gray-500 border-gray-200
+rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div className="col-span-2">
+                            <label className="block text-xs text-gray-500 mb-1">Description</label>
+                            <textarea
+                                value={form.description}
+                                onChange={e => setField("description", e.target.value)}
+                                placeholder="What this assessment evaluates..."
+                                rows={3}
+                                className="w-full px-3 py-2 text-sm text-gray-600 border border-slate-200
+rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                            />
+                        </div>
+                        <div className="col-span-2">
+                            <label className="block text-xs text-gray-500 mb-1">Description</label>
+                            <textarea
+                                value={form.description}
+                                onChange={e => setField("description", e.target.value)}
+                                placeholder="What this assessment evaluates..."
+                                rows={3}
+                                className="w-full px-3 py-2 text-sm text-gray-600 border border-slate-200
+rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                            />
+                        </div>
+                        <div className="col-span-2">
+                            <label className="block text-xs text-gray-600 mb-1">Instructions
+                                for Candidates</label>
+                            <textarea
+                                value={form.instructions}
+                                onChange={e => setField("instructions", e.target.value)}
+                                placeholder="Calculator allowed. No external resources..."
+                                rows={3}
+                                className="w-full px-3 py-2 text-sm text-gray-600 border border-slate-200
+rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                            />
+                        </div>
+                    </div>
+                </div>
+                {/* Question Builder */}
+                <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5 mt-3">
+
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-5">
+                        <h2 className="text-sm font-semibold text-slate-700">
+                            Question Builder — MCQ
+                        </h2>
+
+                        <button
+                            type="button"
+                            onClick={addQuestion}
+                            className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
+                        >
+                            <Plus size={13} />
+                            Add Question
+                        </button>
+                    </div>
+
+                    {/* MCQ Label */}
+                    <div className="inline-flex items-center gap-2 px-4 py-2 mb-5 bg-blue-50 border border-blue-200 rounded-lg text-sm font-medium text-blue-700">
+                        MCQ
+                    </div>
+
+                    {currentQ && (
+                        <div className="space-y-4">
+
+                            {/* Question */}
+                            <div>
+                                <label className="block text-xs text-slate-500 mb-1">
+                                    Question
+                                </label>
+
+                                <textarea
+                                    value={currentQ.question}
+                                    onChange={(e) =>
+                                        setQField(activeQ, "question", e.target.value)
+                                    }
+                                    placeholder="Enter your MCQ question here..."
+                                    rows={3}
+                                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                                />
+                            </div>
+
+                            {/* Options */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {["A", "B", "C", "D"].map((opt) => (
+                                    <div key={opt}>
+                                        <label className="block text-xs text-slate-500 mb-1">
+                                            Option {opt}
+                                        </label>
+
+                                        <input
+                                            value={currentQ[`option${opt}`]}
+                                            onChange={(e) =>
+                                                setQField(activeQ, `option${opt}`, e.target.value)
+                                            }
+                                            placeholder={`Option ${opt}`}
+                                            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Settings Row */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+                                <div>
+                                    <label className="block text-xs text-gray-500 mb-1">
+                                        Correct Answer
+                                    </label>
+
+                                    <select
+                                        value={currentQ.correct}
+                                        onChange={(e) =>
+                                            setQField(activeQ, "correct", e.target.value)
+                                        }
+                                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        {CORRECT_OPTIONS.map((o) => (
+                                            <option key={o} value={o}>
+                                                {o}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs text-gray-500 mb-1">
+                                        Difficulty
+                                    </label>
+
+                                    <select
+                                        value={currentQ.difficulty}
+                                        onChange={(e) =>
+                                            setQField(activeQ, "difficulty", e.target.value)
+                                        }
+                                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        {DIFFICULTIES.map((d) => (
+                                            <option key={d} value={d}>
+                                                {d}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs text-gray-500 mb-1">
+                                        Points
+                                    </label>
+
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        value={currentQ.points}
+                                        onChange={(e) =>
+                                            setQField(activeQ, "points", Number(e.target.value))
+                                        }
+                                        className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                            </div>
+
+                        </div>
+                    )}
+                </div>
+                {/* Questions list */}
+                <div className="bg-white text-gray-600 rounded-xl border border-gray-100 shadow-sm p-5">
+                    <h2 className="text-sm font-semibold text-gray-700 p-4 mt-2 align-center mb-3">Questions
+                        ({questions.length})</h2>
+                    <div className="space-y-2">
+                        {questions.map((q, i) => (
+                            <div
+                                key={q.id}
+                                onClick={() => setActiveQ(i)}
+                                className={`flex items-center text-gray-600 gap-3 px-4 align-center p-2 py-3 rounded-lg border
+cursor-pointer transition-all ${activeQ === i ? "border-blue-200 bg-blue-50" :
+                                        "border-gray-100   hover:bg-gray-50"}`}
+                            >
+                                <span className={`w-7 h-7 rounded-full flex text-center text-gray-600 items-center justify-
+center text-xs font-bold shrink-0 ${activeQ === i ? "bg-blue-600 text-white" :
+                                        "bg-slate-100 text-gray-600"}`}>{i + 1}</span>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[10px] text-gray-400 font-medium uppercase
+tracking-wide">MCQ</p>
+                                    <p className="text-sm text-gray-700 truncate">{q.question ||
+                                        "New question"}</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={e => { e.stopPropagation(); deleteQuestion(i); }}
+                                    className="p-1.5 rounded hover:bg-red-50 justify-center items-center  align-center text-gray-500
+hover:text-red-500 transition-colors"
+                                >
+                                    <Trash2 size={13} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            {/* Right sidebar */}
+            <div className="w-72 shrink-0 gap-4 align-center mt-4 p-2 mb-4 space-y-4">
+                {/* Assessment Preview */}
+                <div className="bg-white rounded-xl border border-slate-100 shadow-sm mt-4 align-center gap-3 p-
+4">
+                    <h3 className="text-sm font-semibold text-slate-700 mt-2 p-2 mb-2">Assessment
+                        Preview</h3>
+                    {/* Desktop preview */}<div className="border border-slate-200 rounded-lg p-4 gap-2 align -center  bg-slate-50 mb-
+5">
+                        <p className="text-[10px] text-slate-400 mb-2">Desktop Preview</p>
+                        {questions[0]?.question ? (
+                            <div>
+                                <p className="text-xs font-medium text-gray-700 mb-2">Question 1
+                                    of {questions.length}</p>
+                                <p className="text-xs text-gray-800 font-semibold mb-
+3">{questions[0].question}</p>
+                                {["A", "B", "C", "D"].map(opt => (
+                                    questions[0][`option${opt}`] ? (
+                                        <div key={opt} className="flex items-center gap-2 mb-1.5">
+                                            <div className="w-3 h-3 rounded-full border border-slate-
+300 shrink-0" />
+                                            <span className="text-xs text-gray-600">{questions[0][`option${opt}`]}</span>
+                                        </div>
+                                    ) : null
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-xs text-gray-400 text-center py-2">Enter a
+                                question to see preview</p>
+                        )}
+                    </div>
+                    {/* Mobile preview */}
+                    <div className="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <p className="text-[10px] text-gray-400 mb-2">Mobile Preview</p>
+                        {questions[0]?.question ? (
+                            <div className="bg-white rounded p-2 shadow-sm">
+                                <p className="text-[10px] text-gray-400 mb-
+1">Q1/{questions.length}</p>
+                                <p className="text-xs text-gray-700">{questions[0].question}</p>
+                            </div>
+                        ) : (
+                            <p className="text-xs text-gray-400 text-center py-2">No preview
+                                yet</p>
+                        )}
+                    </div>
+                </div>
+                {/* Publish Settings */}
+                <div className="bg-white rounded-xl border border-gray-100 gap-3 shadow-sm p-
+4"><h3 className="text-sm font-semibold mt-2 align-center p-3 text-gray-700 mb-3">Publish
+                        Settings</h3>
+                    <div className="space-y-3 px-3">
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">Schedule
+                                Assessment</label>
+                            <input
+                                type="datetime-local"
+                                value={form.scheduleDate}
+                                onChange={e => setField("scheduleDate", e.target.value)}
+                                className="w-full px-3 py-2 text-xs text-gray-600 border border-slate-200
+rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs text-gray-500 mb-1">Assign
+                                To</label>
+                            <input
+                                value={form.assignTo}
+                                onChange={e => setField("assignTo", e.target.value)}
+                                placeholder="candidate@email.com"
+                                className="w-full px-3 py-2 text-xs text-gray-600 border border-gray-200
+rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handlePublish}
+                            className="w-full py-2.5 mb-3 bg-blue-600 text-white rounded-lg text-sm
+font-medium hover:bg-blue-700 transition-colors"
+                        >
+                            Publish Assessment
+                        </button>
+                    </div>
+                </div>
+                {/* Summary */}
+                <div className="bg-white rounded-xl mt-2 mb-2  border border-slate-100 shadow-sm p-
+4">
+                    <h3 className="text-sm font-semibold mt-2 align-center p-3 text-slate-700 mb-3">Summary</h3>
+                    <div className="space-y-2 align-center gap-2 p-3 text-xs">
+                        {[
+                            ["Questions", questions.length],
+                            ["Total Points", questions.reduce((a, q) => a + (Number(q.points)
+                                || 0), 0)], ["Duration", `${form.duration} min`],
+                            ["Passing Score", `${form.passingScore}%`],
+                            ["Difficulty", form.difficulty],
+                        ].map(([k, v]) => (
+                            <div key={k} className="flex justify-between">
+                                <span className="text-gray-500">{k}</span>
+                                <span className="font-medium text-gray-700">{v}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}

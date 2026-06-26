@@ -1,11 +1,9 @@
-"use client";
-
-const AdminFooter = () => {
+export default function AdminFooter() {
   return (
-    <footer className="text-center text-xs text-gray-500 py-4 border-t bg-white">
-      © 2026 AssessIQ Admin Panel
+    <footer className="py-8 text-center border-t">
+      <p className="text-sm text-slate-500">
+        © 2026 AssessIQ. All rights reserved.
+      </p>
     </footer>
   );
-};
-
-export default AdminFooter;
+}

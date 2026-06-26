@@ -118,9 +118,7 @@ export default function TestPage() {
             Question {current + 1} of {questions.length}
           </h2>
 
-          <button className="border px-3 py-1 rounded-lg text-gray-600">
-            🚩 Flag for Review
-          </button>
+          
         </div>
 
         {/* PROGRESS BAR */}

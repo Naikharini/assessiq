@@ -1,37 +1,41 @@
 "use client";
+
 import Link from "next/link";
 
-export default function HeroPage() {
+export default function Hero() {
   return (
-    <div className="min-h-screen bg-white">
+    <section className="py-24 text-center bg-white">
+      {/* Back to Home */}
+            <div className="fixed top-6 left-6 z-50">
+  <Link
+    href="/"
+    className="inline-flex items-center gap-2 text-sm font-medium text-gray-900 hover:text-blue-600 transition"
+  >
+    ← Back to Home
+  </Link>
+</div>
 
-      <header className="flex justify-between items-center px-10 py-4 border-b">
-        <div className="font-semibold text-lg">AssessIQ</div>
-        <div className="text-sm text-gray-500">Admin Login</div>
-      </header>
+      <span className="px-3 py-1 text-xs rounded-full bg-blue-50 text-blue-600">
+        Admin Portal
+      </span>
 
-      <div className="text-center mt-20 px-6">
+      <h1 className="mt-6 text-5xl font-bold text-slate-900">
+        Manage Your Assessment
+        <br />
+        Platform with Ease
+      </h1>
 
-        <span className="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full">
-          Admin Portal
-        </span>
+      <p className="mt-4 max-w-2xl mx-auto text-slate-500">
+        Monitor user activity, manage assessments, view comprehensive analytics,
+        and maintain full control over your MCQ assessment system.
+      </p>
 
-        <h1 className="text-4xl font-bold mt-5">
-          Manage Your Assessment Platform with Ease
-        </h1>
-
-        <p className="text-gray-500 mt-4 max-w-2xl mx-auto">
-          Monitor users, manage assessments and control platform efficiently.
-        </p>
-
-        <Link
-          href="/admin-features"
-          className="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg"
-        >
-          Go to Admin Features
-        </Link>
-
-      </div>
-    </div>
+      <Link
+        href="/admin/login"
+        className="inline-block px-6 py-3 mt-8 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+      >
+        Access Admin Dashboard
+      </Link>
+    </section>
   );
 }

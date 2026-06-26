@@ -11,19 +11,45 @@ export default function UserLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
- 
-  const handleLogin = (e) => {
-    e.preventDefault();
+ const handleLogin = async (e) => {
+  e.preventDefault();
 
-    if (!email || !password) {
-      alert("Please fill all fields");
+  try {
+    const res = await fetch(
+      "http://localhost:5000/api/users/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      }
+    );
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message);
       return;
     }
 
-    alert("Login successful (frontend only)");
+    localStorage.setItem(
+      "user",
+      JSON.stringify(data.user)
+    );
+
+    alert("Login Successful");
 
     router.push("/user/dashboard");
-  };
+
+  } catch (error) {
+    console.error(error);
+    alert("Server Error");
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
@@ -89,11 +115,11 @@ export default function UserLogin() {
 
           {/* Button */}
           <button
-            type="button"
-            onClick={() => router.push("/user/dashboard")}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition">
-           Login
-         </button>
+  type="submit"
+  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition"
+>
+  Login
+</button>
         </form>
 
         {/* Signup */}

@@ -1,64 +1,33 @@
-"use client";
-import Link from "next/link";
-
-export default function StatsPage() {
+export default function Stats() {
   return (
-    <div className="min-h-screen bg-white p-10">
+    <section className="max-w-6xl px-6 mx-auto mb-20">
+      <div className="p-8 border bg-slate-50 rounded-2xl">
+        <h2 className="mb-6 text-2xl font-bold text-slate-800">
+          Platform Statistics
+        </h2>
 
-      <div className="flex justify-between items-center border-b pb-4">
-        <h1 className="font-semibold text-lg">Platform Stats</h1>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="p-5 bg-white rounded-xl">
+            <h3 className="text-2xl font-bold text-blue-600">3</h3>
+            <p className="text-sm text-slate-500">Users</p>
+          </div>
 
-        <Link href="/" className="text-blue-600 text-sm">
-          ← Back
-        </Link>
-      </div>
+          <div className="p-5 bg-white rounded-xl">
+            <h3 className="text-2xl font-bold text-blue-600">5</h3>
+            <p className="text-sm text-slate-500">Assessments</p>
+          </div>
 
-      <div className="grid md:grid-cols-2 gap-6 mt-10">
+          <div className="p-5 bg-white rounded-xl">
+            <h3 className="text-2xl font-bold text-blue-600">78%</h3>
+            <p className="text-sm text-slate-500">Average Score</p>
+          </div>
 
-        <div className="border rounded-xl p-6">
-          <h2 className="font-semibold mb-4">Overview</h2>
-
-          <ul className="space-y-3 text-sm text-gray-600">
-            <li>✔ Users: 3</li>
-            <li>✔ Assessments: 5</li>
-            <li>✔ Avg Score: 78%</li>
-            <li>✔ Active Users: 2</li>
-          </ul>
-        </div>
-
-        <div className="border rounded-xl p-6 shadow-sm">
-          <h2 className="font-semibold mb-4">Quick Stats</h2>
-
-          <div className="grid grid-cols-2 gap-4">
-
-            <Box label="Users" value="3" />
-            <Box label="Tests" value="5" />
-            <Box label="Score" value="78%" />
-            <Box label="Active" value="2" />
-
+          <div className="p-5 bg-white rounded-xl">
+            <h3 className="text-2xl font-bold text-blue-600">2</h3>
+            <p className="text-sm text-slate-500">Active Users</p>
           </div>
         </div>
-
       </div>
-
-      <div className="mt-10">
-        <Link
-          href="/admin-features"
-          className="bg-blue-600 text-white px-6 py-3 rounded-lg"
-        >
-          Back to Features
-        </Link>
-      </div>
-
-    </div>
-  );
-}
-
-function Box({ label, value }) {
-  return (
-    <div className="bg-gray-50 p-3 rounded-lg text-center">
-      <div className="text-blue-600 font-bold">{value}</div>
-      <div className="text-xs text-gray-500">{label}</div>
-    </div>
+    </section>
   );
 }

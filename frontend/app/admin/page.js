@@ -2,18 +2,16 @@
 
 import Hero from "./home/Hero";
 import Features from "./home/Features";
-import Stats from "./home/Stats";
+
 import AdminFooter from "./home/AdminFooter";
 
-const AdminHome = () => {
+export default function AdminHome() {
   return (
-    <div>
+    <div className="min-h-screen bg-gray-50">
       <Hero />
       <Features />
-      <Stats />
+    
       <AdminFooter />
     </div>
   );
-};
-
-export default AdminHome;
+}
