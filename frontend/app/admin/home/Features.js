@@ -122,46 +122,46 @@ export default function AdminFeatures() {
             </div>
 
             {/* Right Side Stats */}
-<div className="bg-white rounded-2xl shadow-lg p-6">
-  <div className="flex justify-between mb-6">
-    <h3 className="font-semibold text-gray-900 text-lg">
-      Platform Statistics
-    </h3>
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <div className="flex justify-between mb-6">
+                <h3 className="font-semibold text-gray-900 text-lg">
+                  Platform Statistics
+                </h3>
 
-    <span className="text-sm text-gray-500">
-      Live Dashboard
-    </span>
-  </div>
+                <span className="text-sm text-gray-500">
+                  Live Dashboard
+                </span>
+              </div>
 
-  <div className="grid grid-cols-2 gap-4">
-    <div className="rounded-xl bg-gray-100 p-4">
-      <p className="text-gray-500 text-sm">Total Users</p>
-      <h4 className="text-3xl font-bold text-blue-600">3</h4>
-    </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-xl bg-gray-100 p-4">
+                  <p className="text-gray-500 text-sm">Total Users</p>
+                  <h4 className="text-3xl font-bold text-blue-600">3</h4>
+                </div>
 
-    <div className="rounded-xl bg-gray-100 p-4">
-      <p className="text-gray-500 text-sm">Assessments</p>
-      <h4 className="text-3xl font-bold text-blue-600">5</h4>
-    </div>
+                <div className="rounded-xl bg-gray-100 p-4">
+                  <p className="text-gray-500 text-sm">Assessments</p>
+                  <h4 className="text-3xl font-bold text-blue-600">5</h4>
+                </div>
 
-    <div className="rounded-xl bg-gray-100 p-4">
-      <p className="text-gray-500 text-sm">Avg. Score</p>
-      <h4 className="text-3xl font-bold text-blue-600">78%</h4>
-    </div>
+                <div className="rounded-xl bg-gray-100 p-4">
+                  <p className="text-gray-500 text-sm">Avg. Score</p>
+                  <h4 className="text-3xl font-bold text-blue-600">78%</h4>
+                </div>
 
-    <div className="rounded-xl bg-gray-100 p-4">
-      <p className="text-gray-500 text-sm">Active Today</p>
-      <h4 className="text-3xl font-bold text-blue-600">2</h4>
-    </div>
-  </div>
+                <div className="rounded-xl bg-gray-100 p-4">
+                  <p className="text-gray-500 text-sm">Active Today</p>
+                  <h4 className="text-3xl font-bold text-blue-600">2</h4>
+                </div>
+              </div>
 
-  <Link
-  href="/admin/login"
-  className="mt-6 block w-full text-center rounded-lg bg-blue-600 py-3 text-white font-medium hover:bg-blue-700"
->
-  Login to Admin Panel
-</Link>
-</div>
+              <Link
+                href="/admin/login"
+                className="mt-6 block w-full text-center rounded-lg bg-blue-600 py-3 text-white font-medium hover:bg-blue-700"
+              >
+                Login to Admin Panel
+              </Link>
+            </div>
           </div>
         </div>
       </section>

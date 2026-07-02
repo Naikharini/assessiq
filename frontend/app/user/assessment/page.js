@@ -9,113 +9,226 @@ import DashboardSidebar from "../../components/user/DashboardSidebar";
 export default function AssessmentPage() {
   const router = useRouter();
 
-  const [skill, setSkill] = useState("Python");
-  const [topic, setTopic] = useState("Data Structures");
-  const [level, setLevel] = useState("Beginner");
-  const [questions, setQuestions] = useState(10);
+  const [skill, setSkill] = useState("React");
+  const [topic, setTopic] = useState("Hooks");
+  const [difficulty, setDifficulty] = useState("Beginner");
+  const [questionCount, setQuestionCount] = useState(10);
+
+  const [loading, setLoading] = useState(false);
+
+  const handleStartAssessment = async () => {
+    setLoading(true);
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/assessment/generate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            skill,
+            topic,
+            difficulty,
+            questionCount,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(data.message || "Failed to generate assessment");
+        setLoading(false);
+        return;
+      }
+
+    
+      sessionStorage.setItem(
+        "questions",
+        JSON.stringify(data.questions)
+      );
+
+     
+      sessionStorage.setItem(
+        "assessment",
+        JSON.stringify({
+          skill,
+          topic,
+          difficulty,
+          questionCount,
+        })
+      );
+
+      router.push("/user/test");
+    } catch (err) {
+      console.log(err);
+      alert("Server Error");
+    }
+
+    setLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
       <DashboardNavbar />
 
       <div className="max-w-7xl mx-auto flex gap-6 px-4 py-6">
-
         <DashboardSidebar />
 
-        {/* MAIN */}
         <div className="flex-1">
 
-          {/* TITLE */}
           <div className="mb-6">
             <h1 className="text-3xl font-bold text-black">
               Create New Assessment
             </h1>
-            <p className="text-gray-700">
+
+            <p className="text-gray-600">
               Configure your AI-powered assessment
             </p>
           </div>
 
-          {/* CARD */}
-          <div className="bg-white border rounded-2xl p-6">
+          <div className="bg-white rounded-2xl border p-6">
 
-            {/* SKILL */}
-            <h2 className="font-semibold text-black mb-3">Select Skill *</h2>
-            <div className="grid grid-cols-3 text-gray-400 gap-3 border-radius mb-6">
-              {["JavaScript","Python","Java","C++","SQL","React","Node.js","ML","DSA","Algorithms"].map((s) => (
+            {/* Skill */}
+
+            <h2 className="font-semibold text-black mb-3">
+              Select Skill
+            </h2>
+
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {[
+                "React",
+                "JavaScript",
+                "Python",
+                "Java",
+                "Node.js",
+                "SQL",
+                "C++",
+                "Machine Learning",
+                "DSA",
+              ].map((item) => (
                 <button
-                  key={s}
-                  onClick={() => setSkill(s)}
-                  className={`border px-3 py-2 rounded-lg ${
-                    skill === s ? "bg-blue-100 border-blue-500 text-blue-900" : ""
+                  key={item}
+                  onClick={() => setSkill(item)}
+                  className={`border border-gray-200 rounded-lg py-3 ${
+                    skill === item
+                      ? "bg-blue-500 text-white border border-blue-400"
+                      : "hover:bg-gray-100 text-gray-500"
                   }`}
                 >
-                  {s}
+                  {item}
                 </button>
               ))}
             </div>
 
-            {/* TOPIC */}
-            <h2 className="font-semibold text-black mb-3">Select Topic *</h2>
-            <div className="grid grid-cols-2 text-gray-400 gap-3 mb-6">
-              {["Data Structures","OOP","Decorators","Generators","File Handling"].map((t) => (
+            {/* Topic */}
+
+            <h2 className="font-semibold text-black mb-3">
+              Select Topic
+            </h2>
+
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              {[
+                "Hooks",
+                "State Management",
+                "Lifecycle",
+                "Components",
+                "OOP",
+                "Data Structures",
+              ].map((item) => (
                 <button
-                  key={t}
-                  onClick={() => setTopic(t)}
-                  className={`border px-3 py-2 rounded-lg ${
-                    topic === t ? "bg-blue-100 border-blue-500 text-blue-900" : ""
+                  key={item}
+                  onClick={() => setTopic(item)}
+                  className={`border border-gray-200 rounded-lg py-3 ${
+                    topic === item
+                      ? "bg-blue-500 text-white border border-blue-400"
+                      : "hover:bg-gray-100 text-gray-500"
                   }`}
                 >
-                  {t}
+                  {item}
                 </button>
               ))}
             </div>
 
-            {/* LEVEL */}
-            <h2 className="font-semibold text-black mb-3">Difficulty *</h2>
-            <div className="flex gap-3 text-gray-400 mb-6">
-              {["Beginner","Intermediate","Advanced"].map((d) => (
+            {/* Difficulty */}
+
+            <h2 className="font-semibold text-black mb-3">
+              Difficulty
+            </h2>
+
+            <div className="flex gap-3 mb-6">
+              {["Beginner", "Intermediate", "Advanced"].map((item) => (
                 <button
-                  key={d}
-                  onClick={() => setLevel(d)}
-                  className={`border px-4 py-2 rounded-lg ${
-                    level === d ? "bg-blue-100 border-blue-500 text-blue-900" : ""
+                  key={item}
+                  onClick={() => setDifficulty(item)}
+                  className={`border border-gray-200 px-5 py-2 rounded-lg ${
+                    difficulty === item
+                      ? "bg-blue-500 text-white"
+                      : "hover:bg-gray-100 text-gray-500"
                   }`}
                 >
-                  {d}
+                  {item}
                 </button>
               ))}
             </div>
 
-            {/* QUESTIONS */}
-            <h2 className="font-semibold text-black mb-3">Questions *</h2>
-            <div className="flex gap-3 text-gray-400 mb-6">
-              {[5,10,15,20].map((q) => (
+            {/* Questions */}
+
+            <h2 className="font-semibold text-black mb-3">
+              Number of Questions
+            </h2>
+
+            <div className="flex gap-3 mb-6">
+              {[5, 10, 15, 20].map((item) => (
                 <button
-                  key={q}
-                  onClick={() => setQuestions(q)}
-                  className={`border px-4 py-2 rounded-lg ${
-                    questions === q ? "bg-blue-100 border-blue-500 text-blue-900" : ""
+                  key={item}
+                  onClick={() => setQuestionCount(item)}
+                  className={`border border-gray-200 px-5 py-2 rounded-lg ${
+                    questionCount === item
+                      ? "bg-blue-500 text-white"
+                      : "hover:bg-gray-100 text-gray-500"
                   }`}
                 >
-                  {q}
+                  {item}
                 </button>
               ))}
             </div>
 
-            {/* PREVIEW */}
-            <div className="bg-blue-50 p-4 text-gray-700 rounded-xl mb-6">
-              <p><b>Skill:</b> {skill}</p>
-              <p><b>Topic:</b> {topic}</p>
-              <p><b>Difficulty:</b> {level}</p>
-              <p><b>Questions:</b> {questions}</p>
+            {/* Preview */}
+
+            <div className="bg-blue-50 rounded-xl p-5 mb-6">
+              <h2 className="font-semibold text-lg text-blue-700 mb-4">
+                Assessment Preview
+              </h2>
+
+              <p className="text-gray-700">
+                <strong>Skill:</strong> {skill}
+              </p>
+
+              <p className="text-gray-700">
+                <strong>Topic:</strong> {topic}
+              </p>
+
+              <p className="text-gray-700">
+                <strong>Difficulty:</strong> {difficulty}
+              </p>
+
+              <p className="text-gray-700">
+                <strong>Questions:</strong> {questionCount}
+              </p>
             </div>
 
-            {/* BUTTON */}
-             <button
-            onClick={() => router.push("/user/test")}
-            className="bg-blue-600 text-white px-6 py-3 rounded-xl">
-      Start Assessment →
-    </button>
+            <button
+              onClick={handleStartAssessment}
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl"
+            >
+              {loading
+                ? "Generating Questions..."
+                : "Start Assessment"}
+            </button>
 
           </div>
         </div>

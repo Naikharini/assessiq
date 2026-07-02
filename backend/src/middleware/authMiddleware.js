@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
   try {
-    // Get token from header
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
@@ -11,8 +10,6 @@ const authMiddleware = (req, res, next) => {
         message: "No token provided",
       });
     }
-
-    // Format: Bearer token
     const token = authHeader.split(" ")[1];
 
     if (!token) {
@@ -21,14 +18,10 @@ const authMiddleware = (req, res, next) => {
         message: "Invalid token format",
       });
     }
-
-    // Verify token
     const decoded = jwt.verify(
       token,
       process.env.JWT_SECRET || "secretkey"
     );
-
-    // Attach user to request
     req.user = decoded;
 
     next();

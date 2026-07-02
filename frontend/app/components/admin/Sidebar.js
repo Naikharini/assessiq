@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   ClipboardList,
   PlusCircle,
+  BarChart3,
   LogOut,
 } from "lucide-react";
 
@@ -25,59 +26,66 @@ const nav = [
     label: "Create Assessment",
     icon: PlusCircle,
   },
+  {
+    id: "results",
+    label: "Results",
+    icon: BarChart3,
+  },
 ];
 
 export default function Sidebar({ activePage, setActivePage }) {
-    const router = useRouter();
-  return (
-    <aside className="w-60 shrink-0 bg-white border-r border-slate-200 flex flex-col h-full">
-      {/* Logo Section */}
-<div className="flex items-center justify-center px-4 py-4 border-b border-slate-100">
-  <div className="relative w-full h-24">
-    <Image
-      src="/Logo.png"
-      alt="AssessIQ Logo"
-      fill
-      className="object-contain"
-      priority
-    />
-  </div>
-</div>
-          
-     
+  const router = useRouter();
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        <p className="text-[10px] uppercase tracking-widest text-slate-400 px-2 mb-2">
-          Main Menu
-        </p>
+  return (
+    <aside className="w-64 bg-white border-r flex flex-col">
+
+      <div className="h-24 flex justify-center items-center border-b">
+        <Image
+          src="/Logo.png"
+          alt="Logo"
+          width={180}
+          height={70}
+          priority
+        />
+      </div>
+
+      <nav className="flex-1 p-4 space-y-2">
 
         {nav.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
-            onClick={() => setActivePage(id)}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-              activePage === id
-                ? "bg-blue-600 text-white shadow-sm"
-                : "text-slate-600 hover:bg-slate-100"
-            }`}
+            onClick={() => {
+              console.log(id);
+              setActivePage(id);
+            }}
+            className={`w-full flex items-center gap-3 rounded-lg px-4 py-3 transition
+
+              ${
+                activePage === id
+                  ? "bg-blue-600 text-white"
+                  : "hover:bg-slate-100 text-slate-700"
+              }
+            `}
           >
-            <Icon size={16} />
-            <span>{label}</span>
+            <Icon size={18} />
+            {label}
           </button>
         ))}
+
       </nav>
 
-      {/* Logout */}
-<div className="px-3 py-4 border-t border-slate-100">
-  <button
-    onClick={() => router.push("/admin")}
-    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:bg-slate-100 transition-all"
-  >
-    <LogOut size={16} />
-    <span>Logout</span>
-  </button>
-</div>
+      <div className="border-t p-4">
+
+        <button
+          onClick={() => router.push("/admin/login")}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-red-50 text-red-600"
+        >
+          <LogOut size={18} />
+          Logout
+        </button>
+
+      </div>
+
     </aside>
   );
 }

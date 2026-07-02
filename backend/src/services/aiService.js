@@ -6,11 +6,21 @@ const client = new OpenAI({
 
 const generateMCQs = async ({ skill, count, difficulty }) => {
   const prompt = `
-Generate ${count} MCQ questions for the skill: ${skill}
-Difficulty level: ${difficulty}
+You are an AI that generates exam questions.
 
-Return ONLY valid JSON in this format:
+Generate ${count} multiple-choice questions for:
 
+Skill: ${skill}
+Difficulty: ${difficulty}
+
+Rules:
+- Return ONLY valid JSON
+- No explanations
+- No markdown
+- Each question must have 4 options
+- Only one correct answer
+
+Format:
 [
   {
     "question": "",
@@ -23,6 +33,7 @@ Return ONLY valid JSON in this format:
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [{ role: "user", content: prompt }],
+    temperature: 0.7,
   });
 
   return JSON.parse(response.choices[0].message.content);

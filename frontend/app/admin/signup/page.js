@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -7,14 +8,52 @@ import { useRouter } from "next/navigation";
 export default function AdminSignup() {
   const router = useRouter();
 
-  const handleSignup = (e) => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSignup = async (e) => {
     e.preventDefault();
 
-    // Add signup validation/API here
+    if (password !== confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
 
-    alert("Account created successfully!");
+    setLoading(true);
 
-    router.push("/admin/login");
+    try {
+      const res = await fetch("http://localhost:5000/api/admin/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Signup failed");
+        setLoading(false);
+        return;
+      }
+
+      alert("Account created successfully!");
+
+      router.push("/admin/login");
+    } catch (error) {
+      console.error(error);
+      alert("Server Error");
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -55,6 +94,8 @@ export default function AdminSignup() {
             <input
               type="text"
               placeholder="Enter your full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -69,6 +110,8 @@ export default function AdminSignup() {
             <input
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -83,6 +126,8 @@ export default function AdminSignup() {
             <input
               type="password"
               placeholder="Create password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -97,6 +142,8 @@ export default function AdminSignup() {
             <input
               type="password"
               placeholder="Confirm password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -105,9 +152,10 @@ export default function AdminSignup() {
           {/* Signup Button */}
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition"
           >
-            Create Account
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 

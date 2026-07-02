@@ -27,7 +27,7 @@ export default function Home() {
               🎯
             </div>
             <h2 className="text-2xl font-semibold mt-6 text-slate-900 text-color-black">
-              I'm a User
+               User
             </h2>
             <p className="text-slate-600 mt-4">
               Take AI-powered assessments, track your progress,
@@ -52,7 +52,7 @@ export default function Home() {
               📊
             </div>
             <h2 className="text-2xl font-semibold mt-6 text-slate-900 text-color-black">
-              I'm an Admin
+              Admin
             </h2>
             <p className="text-slate-600 mt-4">
               Monitor platform activity, manage user assessments,

@@ -1,19 +1,12 @@
-const { Pool } = require("pg");
+const db = require("./models");
 
-const pool = new Pool({
-  user: "postgres",
-  host: "localhost",
-  database: "assessiq",
-  password: "postgres123",
-  port: 5432,
-});
-
-pool.query("SELECT NOW()")
+db.sequelize
+  .sync({ alter: true })
   .then(() => {
-    console.log("✅ PostgreSQL connected successfully");
+    console.log("PostgreSQL connected successfully");
   })
   .catch((err) => {
-    console.error("❌ PostgreSQL connection error:", err.message);
+    console.error("Database Error:", err);
   });
 
-module.exports = pool;
+module.exports = db;

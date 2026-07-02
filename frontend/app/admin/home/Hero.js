@@ -14,7 +14,6 @@ export default function Hero() {
     ← Back to Home
   </Link>
 </div>
-
       <span className="px-3 py-1 text-xs rounded-full bg-blue-50 text-blue-600">
         Admin Portal
       </span>

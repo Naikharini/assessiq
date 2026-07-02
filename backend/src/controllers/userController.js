@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
-const { User } = require("../../models");
+const jwt = require("jsonwebtoken");
+const { User } = require("../models");
 
 exports.signup = async (req, res) => {
   try {
@@ -37,7 +38,7 @@ exports.signup = async (req, res) => {
 
     res.status(200).json({
   success: true,
-  message: "Login successful",
+  message: "User created successfully",
   user: {
     id: user.id,
     fullName: user.fullName,
@@ -72,7 +73,8 @@ exports.login = async (req, res) => {
         message: "User not found"
       });
     }
-
+    
+    
     const isMatch = await bcrypt.compare(
       password,
       user.password
@@ -85,11 +87,22 @@ exports.login = async (req, res) => {
       });
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Login successful",
-      user
-    });
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(201).json({
+  success: true,
+  message: "User registered successfully",
+  user: {
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    role: user.role
+  }
+});
 
   } catch (error) {
 
