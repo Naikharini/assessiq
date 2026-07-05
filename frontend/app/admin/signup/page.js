@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminSignup() {
   const router = useRouter();
@@ -13,7 +14,8 @@ export default function AdminSignup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const handleSignup = async (e) => {
     e.preventDefault();
 
@@ -119,36 +121,60 @@ export default function AdminSignup() {
 
           {/* Password */}
           <div>
-            <label className="block text-sm text-gray-700 font-medium mb-2">
-              Password
-            </label>
+  <label className="block text-sm text-gray-700 font-medium mb-2">
+    Password
+  </label>
 
-            <input
-              type="password"
-              placeholder="Create password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+  <div className="relative">
+    <input
+      type={showPassword ? "text" : "password"}
+      placeholder="Create password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      className="w-full px-4 py-3 pr-12 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+      required
+    />
 
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+    >
+      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+    </button>
+  </div>
+</div>
           {/* Confirm Password */}
           <div>
-            <label className="block text-sm text-gray-700 font-medium mb-2">
-              Confirm Password
-            </label>
+  <label className="block text-sm text-gray-700 font-medium mb-2">
+    Confirm Password
+  </label>
 
-            <input
-              type="password"
-              placeholder="Confirm password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+  <div className="relative">
+    <input
+      type={showConfirmPassword ? "text" : "password"}
+      placeholder="Confirm password"
+      value={confirmPassword}
+      onChange={(e) => setConfirmPassword(e.target.value)}
+      className="w-full px-4 py-3 pr-12 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+      required
+    />
 
+    <button
+      type="button"
+      onClick={() =>
+        setShowConfirmPassword(!showConfirmPassword)
+      }
+      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+    >
+      {showConfirmPassword ? (
+        <EyeOff size={20} />
+      ) : (
+        <Eye size={20} />
+      )}
+    </button>
+  </div>
+</div>
           {/* Signup Button */}
           <button
             type="submit"

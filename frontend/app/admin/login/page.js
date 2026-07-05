@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -11,7 +12,7 @@ export default function AdminLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false);
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -38,7 +39,7 @@ export default function AdminLogin() {
       localStorage.setItem("token", data.token);
       localStorage.setItem("admin", JSON.stringify(data.admin));
 
-      alert("Admin Login Successful");
+      
 
       router.push("/admin/dashboard");
     } catch (error) {
@@ -96,19 +97,29 @@ export default function AdminLogin() {
 
           {/* PASSWORD */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
+  <label className="block text-sm font-medium text-gray-700 mb-2">
+    Password
+  </label>
 
-            <input
-              type="password"
-              placeholder="Enter password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border text-gray-700 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+  <div className="relative">
+    <input
+      type={showPassword ? "text" : "password"}
+      placeholder="Enter password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      className="w-full px-4 py-3 pr-12 border text-gray-700 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+      required
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+    >
+      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+    </button>
+  </div>
+</div>
 
           {/* BUTTON */}
           <button
