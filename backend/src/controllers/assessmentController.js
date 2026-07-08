@@ -68,9 +68,9 @@ exports.createAssessment = async (req, res) => {
   }
 };
 
-// ============================
+
 // Get All Assessments
-// ============================
+
 exports.getAllAssessments = async (req, res) => {
   try {
     const assessments = await Assessment.findAll({
@@ -92,9 +92,8 @@ exports.getAllAssessments = async (req, res) => {
   }
 };
 
-// ============================
 // Get Assessment By Id
-// ============================
+
 exports.getAssessmentById = async (req, res) => {
   try {
     const assessment = await Assessment.findByPk(req.params.id, {
@@ -122,9 +121,9 @@ exports.getAssessmentById = async (req, res) => {
   }
 };
 
-// ============================
+
 // Delete Assessment
-// ============================
+
 exports.deleteAssessment = async (req, res) => {
   try {
     const assessment = await Assessment.findByPk(req.params.id);
