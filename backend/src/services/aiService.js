@@ -1,42 +1,71 @@
-const OpenAI = require("openai");
+const anthropic = require("../../config/claude");
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const generateQuestions = async (
+    topic,
+    difficulty,
+    numberOfQuestions
+) => {
 
-const generateMCQs = async ({ skill, count, difficulty }) => {
-  const prompt = `
-You are an AI that generates exam questions.
+    const prompt = `
+You are an expert technical interviewer.
 
-Generate ${count} multiple-choice questions for:
+Generate exactly ${numberOfQuestions} multiple-choice questions.
 
-Skill: ${skill}
+Topic: ${topic}
 Difficulty: ${difficulty}
 
 Rules:
-- Return ONLY valid JSON
-- No explanations
-- No markdown
 - Each question must have 4 options
-- Only one correct answer
+- Only ONE correct answer
+- Include explanation
+- No duplicates
+- Return ONLY valid JSON (no markdown, no text)
 
-Format:
-[
-  {
-    "question": "",
-    "options": ["A", "B", "C", "D"],
-    "answer": ""
-  }
-]
+JSON format:
+{
+  "questions": [
+    {
+      "question": "",
+      "options": ["", "", "", ""],
+      "correctAnswer": "",
+      "explanation": ""
+    }
+  ]
+}
 `;
 
-  const response = await client.chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: prompt }],
-    temperature: 0.7,
-  });
+    const response = await anthropic.messages.create({
+  model: "claude-3-5-haiku-20241022",
+  max_tokens: 2000,
+  temperature: 0.2,
+  messages: [
+    {
+      role: "user",
+      content: prompt
+    }
+  ]
+});
 
-  return JSON.parse(response.choices[0].message.content);
+    let text = response.content[0].text;
+
+    try {
+        return JSON.parse(text);
+    } catch (err) {
+        console.log("Raw AI Response:", text);
+
+        // fallback: extract JSON only
+        const jsonStart = text.indexOf("{");
+        const jsonEnd = text.lastIndexOf("}");
+
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+            const cleanJson = text.substring(jsonStart, jsonEnd + 1);
+            return JSON.parse(cleanJson);
+        }
+
+        throw new Error("Invalid JSON response from Claude");
+    }
 };
 
-module.exports = { generateMCQs };
+module.exports = {
+    generateQuestions
+};

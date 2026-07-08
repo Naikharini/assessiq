@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const { generateAssessment } = require("../controllers/claudeAiController");
+const aiController = require("../controllers/claudeAiController");
 
-router.post("/generate", generateAssessment);
+router.post("/generate", aiController.generateAssessment);
 
 module.exports = router;

@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
         primaryKey: true,
       },
+
       name: DataTypes.STRING,
       jobRole: DataTypes.STRING,
       department: DataTypes.STRING,
