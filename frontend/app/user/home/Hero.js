@@ -17,7 +17,7 @@ export default function Hero() {
   const router = useRouter();
  
   return (
-    <section className=" bg-slate-50 p-8 mt-5">
+    <section className="mesh-content p-8 mt-5">
  
       {/* Back to Home */}
       <div className="pl-6">
@@ -34,7 +34,7 @@ export default function Hero() {
  
         {/* Left Side */}
         <div>
-          <span className="inline-block bg-blue-50 text-blue-600 text-sm px-4 py-2 rounded-full font-medium">
+          <span className="inline-block glass-badge text-indigo-700 text-sm px-4 py-2 rounded-full font-medium">
             For Students & Learners
           </span>
  
@@ -59,14 +59,14 @@ export default function Hero() {
           </ul>
  
           <div className="flex flex-wrap gap-4 mt-10">
-            <button onClick={() => router.push("/user/signup")} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-medium transition">
+            <button onClick={() => router.push("/user/signup")} className="glass-btn px-6 py-3 rounded-xl font-medium">
               Get Started Free
             </button>
- 
+
             <button
-      onClick={() => router.push("/user/login")}
-      className="px-6 py-3 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-100 transition font-medium"
-    >
+              onClick={() => router.push("/user/login")}
+              className="px-6 py-3 rounded-xl glass-btn-outline font-medium"
+            >
               Login
             </button>
           </div>
@@ -107,22 +107,8 @@ export default function Hero() {
  
 function FeatureCard({ title, desc, icon }) {
   return (
-    <div
-      className="
-        bg-white
-        border
-        border-slate-200
-        rounded-2xl
-        p-6
-        shadow-sm
-        hover:shadow-xl
-        hover:-translate-y-2
-        transition-all
-        duration-300
-        cursor-pointer
-      "
-    >
-      <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center mb-4">
+    <div className="glass-card rounded-2xl p-6 cursor-pointer">
+      <div className="w-12 h-12 rounded-xl glass-subtle flex items-center justify-center mb-4">
         {icon}
       </div>
  

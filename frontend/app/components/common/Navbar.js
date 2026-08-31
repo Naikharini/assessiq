@@ -9,10 +9,8 @@ export default function Navbar() {
   const [signupOpen, setSignupOpen] = useState(false);
 
   return (
-    <nav className="border-b bg-white relative">
+    <nav className="glass-nav sticky top-0 z-50 mesh-content">
       <div className="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-
-        {/* Logo */}
         <Link href="/">
           <Image
             src="/Logo.png"
@@ -23,31 +21,27 @@ export default function Navbar() {
           />
         </Link>
 
-        {/* Right Buttons */}
         <div className="flex items-center gap-4 relative">
-
-          {/* LOGIN DROPDOWN */}
           <div className="relative">
             <button
               onClick={() => setLoginOpen(!loginOpen)}
-              className="bg-white text-black px-6 py-2 rounded-lg hover:bg-blue-100 transition border border-gray-300"
+              className="glass-btn-outline px-6 py-2 rounded-xl text-sm font-medium"
             >
               Login
             </button>
 
             {loginOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg overflow-hidden">
+              <div className="absolute right-0 mt-2 w-44 glass-dropdown rounded-xl overflow-hidden">
                 <Link
                   href="/user/login"
-                  className="block px-4 py-2 hover:bg-gray-100 text-black"
+                  className="block px-4 py-2.5 hover:bg-white/60 text-slate-800 text-sm"
                   onClick={() => setLoginOpen(false)}
                 >
                   User Login
                 </Link>
-
                 <Link
                   href="/admin/login"
-                  className="block px-4 py-2 hover:bg-gray-100 text-black"
+                  className="block px-4 py-2.5 hover:bg-white/60 text-slate-800 text-sm"
                   onClick={() => setLoginOpen(false)}
                 >
                   Admin Login
@@ -56,28 +50,26 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* SIGNUP DROPDOWN */}
           <div className="relative">
             <button
               onClick={() => setSignupOpen(!signupOpen)}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+              className="glass-btn px-6 py-2 rounded-xl text-sm font-medium"
             >
               Sign Up
             </button>
 
             {signupOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg overflow-hidden">
+              <div className="absolute right-0 mt-2 w-44 glass-dropdown rounded-xl overflow-hidden">
                 <Link
                   href="/user/signup"
-                  className="block px-4 py-2 hover:bg-gray-100 text-black"
+                  className="block px-4 py-2.5 hover:bg-white/60 text-slate-800 text-sm"
                   onClick={() => setSignupOpen(false)}
                 >
                   User Signup
                 </Link>
-
                 <Link
                   href="/admin/signup"
-                  className="block px-4 py-2 hover:bg-gray-100 text-black"
+                  className="block px-4 py-2.5 hover:bg-white/60 text-slate-800 text-sm"
                   onClick={() => setSignupOpen(false)}
                 >
                   Admin Signup
@@ -85,7 +77,6 @@ export default function Navbar() {
               </div>
             )}
           </div>
-
         </div>
       </div>
     </nav>

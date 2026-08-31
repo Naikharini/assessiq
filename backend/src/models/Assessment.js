@@ -18,6 +18,14 @@ module.exports = (sequelize, DataTypes) => {
       instructions: DataTypes.TEXT,
       scheduleDate: DataTypes.DATE,
       assignTo: DataTypes.STRING,
+      skills: DataTypes.STRING,
+      topic: DataTypes.STRING,
+      createdBy: {
+        type: DataTypes.STRING,
+        defaultValue: "admin",
+      },
+      userId: DataTypes.INTEGER,
+      adminId: DataTypes.INTEGER,
     },
     {
       tableName: "assessments",

@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
-import { Plus, Trash2, Save, Eye, Send, ChevronDown } from "lucide-react";
+import { Plus, Trash2, Save, Eye, Send, ChevronDown, Sparkles } from "lucide-react";
+import { apiFetch } from "../../lib/api";
+import { SKILLS, getDefaultTopic, getTopicsForSkill } from "../../lib/skills";
 const DEPARTMENTS = ["Engineering", "Product", "Design", "Data Science",
     "Marketing", "Operations", "HR"];
 const DIFFICULTIES = ["Easy", "Medium", "Hard", "Expert"];
@@ -20,7 +22,15 @@ export default function CreateAssessment() {
     const [activeQ, setActiveQ] = useState(0);
     const [published, setPublished] = useState(false);
     const [deptOpen, setDeptOpen] = useState(false);
+    const [aiSkill, setAiSkill] = useState("React");
+    const [aiTopic, setAiTopic] = useState(getDefaultTopic("React"));
+    const [generating, setGenerating] = useState(false);
+    const [publishing, setPublishing] = useState(false);
     const setField = (k, v) => setForm(f => ({ ...f, [k]: v }));
+    const handleAiSkillChange = (nextSkill) => {
+        setAiSkill(nextSkill);
+        setAiTopic(getDefaultTopic(nextSkill));
+    };
     const setQField = (idx, k, v) => setQuestions(qs => qs.map((q, i) => i === idx
         ? { ...q, [k]: v } : q));
     const addQuestion = () => {
@@ -33,7 +43,7 @@ export default function CreateAssessment() {
         setQuestions(qs => qs.filter((_, i) => i !== idx));
         setActiveQ(Math.max(0, idx - 1));
     };
-    const handlePublish = () => {
+    const handlePublish = async () => {
         if (!form.name) {
             alert("Please enter an assessment name.");
             return;
@@ -44,7 +54,80 @@ export default function CreateAssessment() {
             return;
         }
 
-        setPublished(true);
+        setPublishing(true);
+        try {
+            await apiFetch(
+                "/api/assessment/create",
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        ...form,
+                        duration: Number(form.duration),
+                        passingScore: Number(form.passingScore),
+                        skills: form.jobRole,
+                        questions: questions.map(({ id, ...q }) => q),
+                    }),
+                },
+                "admin"
+            );
+            setPublished(true);
+        } catch (err) {
+            alert(err.message || "Failed to publish assessment");
+        }
+        setPublishing(false);
+    };
+
+    const handleGenerateAI = async () => {
+        setGenerating(true);
+        try {
+            const data = await apiFetch(
+                "/api/ai/generate",
+                {
+                    method: "POST",
+                    body: JSON.stringify({
+                        skill: aiSkill,
+                        topic: aiTopic,
+                        difficulty: form.difficulty,
+                        questionCount: 3,
+                    }),
+                },
+                "admin"
+            );
+
+            const generated = (data.questions || []).map((q, i) => {
+                const options = q.options || [];
+                const correctIdx = options.findIndex(
+                    (opt) => opt === q.correctAnswer
+                );
+                const letters = ["A", "B", "C", "D"];
+
+                return {
+                    id: Date.now() + i,
+                    question: q.question,
+                    optionA: options[0] || "",
+                    optionB: options[1] || "",
+                    optionC: options[2] || "",
+                    optionD: options[3] || "",
+                    correct: letters[correctIdx >= 0 ? correctIdx : 0],
+                    difficulty: form.difficulty,
+                    points: 5,
+                };
+            });
+
+            if (generated.length) {
+                setQuestions(generated);
+                setActiveQ(0);
+                if (!form.name) {
+                    setField("name", `${aiSkill} - ${aiTopic} Assessment`);
+                }
+                if (!form.jobRole) {
+                    setField("jobRole", aiSkill);
+                }
+            }
+        } catch (err) {
+            alert(err.message || "AI generation failed");
+        }
+        setGenerating(false);
     };
     const currentQ = questions[activeQ];
     if (published) {
@@ -107,13 +190,14 @@ export default function CreateAssessment() {
                         </button>
                         <button
                             onClick={handlePublish}
-                            className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                            disabled={publishing}
+                            className="flex items-center gap-1.5 px-4 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-60"
                         >
-                            <Send size={14} /> Publish
+                            <Send size={14} /> {publishing ? "Publishing..." : "Publish"}
                         </button>
                     </div></div>
                 {/* Assessment Details card */}
-                <div className="bg-white rounded-xl border gap-4 border-slate-100 shadow-sm align-center p-5">
+                <div className="glass-strong rounded-xl gap-4 align-center p-5">
                     <h2 className="text-sm font-semibold  text-slate-700 mt-1 mb-4">Assessment
                         Details</h2>
                     <div className="grid grid-cols-2 gap-4 px-4 py-4">
@@ -240,8 +324,48 @@ export default function CreateAssessment() {
                         </div>
                     </div>
                 </div>
+                {/* AI Generate */}
+                <div className="glass-strong rounded-xl p-5">
+                    <h2 className="text-sm font-semibold text-slate-700 mb-4">
+                        Generate with AI (3 questions, low token usage)
+                    </h2>
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                        <select
+                            value={aiSkill}
+                            onChange={(e) => handleAiSkillChange(e.target.value)}
+                            className="px-3 py-2 text-sm border border-slate-200 rounded-lg"
+                        >
+                            {SKILLS.map((item) => (
+                                <option key={item} value={item}>
+                                    {item}
+                                </option>
+                            ))}
+                        </select>
+                        <select
+                            value={aiTopic}
+                            onChange={(e) => setAiTopic(e.target.value)}
+                            className="px-3 py-2 text-sm border border-slate-200 rounded-lg"
+                        >
+                            {getTopicsForSkill(aiSkill).map((item) => (
+                                <option key={item} value={item}>
+                                    {item}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleGenerateAI}
+                        disabled={generating}
+                        className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 disabled:opacity-60"
+                    >
+                        <Sparkles size={14} />
+                        {generating ? "Generating..." : "Generate Questions"}
+                    </button>
+                </div>
+
                 {/* Question Builder */}
-                <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-5 mt-3">
+                <div className="glass-strong rounded-xl p-5 mt-3">
 
                     {/* Header */}
                     <div className="flex items-center justify-between mb-5">
@@ -369,7 +493,7 @@ export default function CreateAssessment() {
                     )}
                 </div>
                 {/* Questions list */}
-                <div className="bg-white text-gray-600 rounded-xl border border-gray-100 shadow-sm p-5">
+                <div className="glass-strong text-gray-600 rounded-xl p-5">
                     <h2 className="text-sm font-semibold text-gray-700 p-4 mt-2 align-center justify-content mb-3">Questions
                         ({questions.length})</h2>
                     <div className="space-y-2">
@@ -403,7 +527,7 @@ export default function CreateAssessment() {
             <div className="w-72 shrink-0 gap-4 align-center mt-4 p-2 mb-4 space-y-4">
 
                 {/* Publish Settings */}
-                <div className="bg-white rounded-xl border border-gray-100  shadow-sm p-4">
+                <div className="glass-strong rounded-xl p-4">
                     <h3 className="text-sm font-semibold mt-2 align-center p-3 text-gray-700 mb-3">Publish Settings</h3>
                     <div className="space-y-3 px-3">
                         <div>
@@ -430,14 +554,15 @@ export default function CreateAssessment() {
                         <button
                             type="button"
                             onClick={handlePublish}
-                            className="w-full py-2.5 mb-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                            disabled={publishing}
+                            className="w-full py-2.5 mb-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-60"
                         >
-                            Publish Assessment
+                            {publishing ? "Publishing..." : "Publish Assessment"}
                         </button>
                     </div>
                 </div>
                 {/* Summary */}
-                <div className="bg-white rounded-xl mt-2 mb-2  border border-slate-100 shadow-sm p-4">
+                <div className="glass-strong rounded-xl mt-2 mb-2 p-4">
                     <h3 className="text-sm font-semibold mt-2 align-center p-3 text-slate-700 mb-3">Summary</h3>
                     <div className="space-y-2 align-center gap-2 p-3 text-xs">
                         {[

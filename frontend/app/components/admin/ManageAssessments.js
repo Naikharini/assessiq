@@ -8,6 +8,7 @@ import {
   Trash2,
   Plus,
 } from "lucide-react";
+import { apiFetch } from "../../lib/api";
 
 export default function ManageAssessments() {
   const [assessments, setAssessments] = useState([]);
@@ -19,12 +20,8 @@ export default function ManageAssessments() {
 
   const fetchAssessments = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/assessment/all");
-      const data = await res.json();
-
-      if (data.success) {
-        setAssessments(data.assessments);
-      }
+      const data = await apiFetch("/api/assessment/all", {}, "admin");
+      setAssessments(data.assessments || []);
     } catch (err) {
       console.log(err);
     }
@@ -34,10 +31,7 @@ export default function ManageAssessments() {
     if (!confirm("Delete this assessment?")) return;
 
     try {
-      await fetch(`http://localhost:5000/api/assessment/${id}`, {
-        method: "DELETE",
-      });
-
+      await apiFetch(`/api/assessment/${id}`, { method: "DELETE" }, "admin");
       fetchAssessments();
     } catch (err) {
       console.log(err);
@@ -67,7 +61,7 @@ export default function ManageAssessments() {
 
         </div>
 
-        <button className="bg-blue-600 text-white px-5 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-700">
+        <button className="glass-btn px-5 py-2 rounded-xl flex items-center gap-2">
 
           <Plus size={16} />
 
@@ -97,11 +91,11 @@ export default function ManageAssessments() {
 
       {/* Table */}
 
-      <div className="bg-white rounded-xl shadow border overflow-hidden">
+      <div className="glass-table rounded-xl overflow-hidden">
 
         <table className="w-full">
 
-          <thead className="bg-slate-100">
+          <thead className="glass-subtle">
 
             <tr className="text-left text-sm text-slate-600">
 

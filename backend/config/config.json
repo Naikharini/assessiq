@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "postgres",
-    "password": "postgres123",
+    "username": "ottl",
+    "password": "()P3n7u6f!2023",
     "database": "assessiq",
-    "host": "127.0.0.1",
+    "host": "localhost",
     "dialect": "postgres"
   }
 }

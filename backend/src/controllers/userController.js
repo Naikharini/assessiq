@@ -93,16 +93,17 @@ exports.login = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.status(201).json({
-  success: true,
-  message: "User registered successfully",
-  user: {
-    id: user.id,
-    fullName: user.fullName,
-    email: user.email,
-    role: user.role
-  }
-});
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      token,
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role,
+      },
+    });
 
   } catch (error) {
 
