@@ -1,14 +1,17 @@
 const { Sequelize, DataTypes } = require("sequelize");
-require("dotenv").config();
+const databaseConfig = require("../config/database");
 
 const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
+  databaseConfig.database,
+  databaseConfig.username,
+  databaseConfig.password,
   {
-    host: process.env.DB_HOST,
-    dialect: "postgres",
-    logging: false,
+    host: databaseConfig.host,
+    port: databaseConfig.port,
+    dialect: databaseConfig.dialect,
+    logging: databaseConfig.logging,
+    dialectOptions: databaseConfig.dialectOptions,
+    pool: databaseConfig.pool,
   }
 );
 
@@ -20,7 +23,7 @@ db.User = require("./User")(sequelize, DataTypes);
 db.Admin = require("./Admin")(sequelize, DataTypes);
 db.Assessment = require("./Assessment")(sequelize, DataTypes);
 db.Question = require("./Question")(sequelize, DataTypes);
-
+db.AssessmentAttempt = require("./AssessmentAttempt")(sequelize, DataTypes);
 
 db.Assessment.hasMany(db.Question, {
   foreignKey: "assessmentId",
@@ -32,5 +35,11 @@ db.Question.belongsTo(db.Assessment, {
   foreignKey: "assessmentId",
   as: "assessment",
 });
+
+db.User.hasMany(db.AssessmentAttempt, { foreignKey: "userId" });
+db.AssessmentAttempt.belongsTo(db.User, { foreignKey: "userId" });
+
+db.Assessment.hasMany(db.AssessmentAttempt, { foreignKey: "assessmentId" });
+db.AssessmentAttempt.belongsTo(db.Assessment, { foreignKey: "assessmentId" });
 
 module.exports = db;

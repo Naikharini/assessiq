@@ -5,152 +5,103 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
+
 export default function UserLogin() {
   const router = useRouter();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
- const handleLogin = async (e) => {
-  e.preventDefault();
 
-  try {
-    const res = await fetch(
-      "http://localhost:5000/api/users/login",
-      {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message);
+        return;
       }
-    );
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message);
-      return;
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+      router.push("/user/dashboard");
+    } catch (error) {
+      console.error(error);
+      alert("Server Error");
     }
-
-   
-    localStorage.setItem("token", data.token);
-    localStorage.setItem(
-      "user",
-      JSON.stringify(data.user)
-    );
-
-    
-
-    router.push("/user/dashboard");
-
-  } catch (error) {
-    console.error(error);
-    alert("Server Error");
-  }
-};
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
+    <div className="min-h-screen flex items-center justify-center px-6 mesh-content relative">
+      <div className="glass-orb w-72 h-72 bg-indigo-400 top-10 left-10" />
+      <div className="glass-orb w-56 h-56 bg-blue-400 bottom-10 right-10" />
 
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-lg p-8">
-
-        {/* Logo */}
+      <div className="w-full max-w-md glass-strong rounded-3xl p-8 relative z-10">
         <div className="flex justify-center mb-6">
-          <Image
-            src="/Logo.png"
-            alt="AssessIQ Logo"
-            width={180}
-            height={60}
-            priority
-          />
+          <Image src="/Logo.png" alt="AssessIQ Logo" width={180} height={60} priority />
         </div>
 
-        {/* Heading */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-slate-900">
-            Welcome Back
-          </h1>
-
-          <p className="text-slate-500 mt-2">
-            Sign in to continue to AssessIQ
-          </p>
+          <h1 className="text-3xl font-bold text-slate-900">Welcome Back</h1>
+          <p className="text-slate-500 mt-2">Sign in to continue to AssessIQ</p>
         </div>
 
-        {/* Form */}
         <form className="mt-8 space-y-5" onSubmit={handleLogin}>
-
-          {/* Email */}
           <div>
-            <label className="block text-sm text-gray-700 font-medium mb-2">
-              Email
-            </label>
-
+            <label className="block text-sm text-slate-700 font-medium mb-2">Email</label>
             <input
               type="email"
               placeholder="Enter your email"
-              className="w-full px-4 py-3 border border-gray-300 text-gray-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 glass-input text-slate-700 rounded-xl"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
 
-          {/* Password */}
           <div>
-  <label className="block text-sm font-medium text-gray-700 mb-2">
-    Password
-  </label>
+            <label className="block text-sm font-medium text-slate-700 mb-2">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 pr-12 glass-input text-slate-700 rounded-xl"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-3 flex items-center text-slate-500 hover:text-slate-700"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
+          </div>
 
-  <div className="relative">
-    <input
-      type={showPassword ? "text" : "password"}
-      placeholder="Enter password"
-      value={password}
-      onChange={(e) => setPassword(e.target.value)}
-      className="w-full px-4 py-3 pr-12 border text-gray-700 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-      required
-    />
-
-    <button
-      type="button"
-      onClick={() => setShowPassword(!showPassword)}
-      className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
-    >
-      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-    </button>
-  </div>
-</div>
-
-          {/* Button */}
-          <button
-  type="submit"
-  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-medium transition"
->
-  Login
-</button>
+          <button type="submit" className="w-full glass-btn py-3 rounded-xl font-medium">
+            Login
+          </button>
         </form>
 
-        {/* Signup */}
         <div className="text-center mt-6">
-          <p className="text-gray-600">
-            Don't have an account?{" "}
-            <Link href="/user/signup" className="text-blue-600 font-medium hover:underline">
+          <p className="text-slate-600">
+            Don&apos;t have an account?{" "}
+            <Link href="/user/signup" className="text-indigo-600 font-medium hover:underline">
               Sign Up
             </Link>
           </p>
         </div>
 
-        {/* Back */}
         <div className="text-center mt-4">
-          <Link href="/" className="text-sm text-gray-500 hover:text-blue-600">
+          <Link href="/" className="text-sm text-slate-500 hover:text-indigo-600">
             ← Back to Home
           </Link>
         </div>
-
       </div>
     </div>
   );

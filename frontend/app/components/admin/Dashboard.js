@@ -159,7 +159,7 @@ export default function Dashboard() {
         {stats.map(({ label, value, sub, icon: Icon, color }) => {
           const c = colorMap[color];
           return (
-            <div key={label} className="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+            <div key={label} className="glass-strong rounded-xl p-4 shadow-sm">
               <div className={`w-8 h-8 rounded-lg ${c.bg} flex items-center justify-center mb-3`}>
                 <Icon size={16} className={c.text} />
               </div>
@@ -172,7 +172,7 @@ export default function Dashboard() {
       </div>
       {/* Charts row */}<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Activity chart */}
-        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+        <div className="glass-strong rounded-xl p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-700 mb-4">Daily
             Assessment Activity</h2>
           <ResponsiveContainer width="100%" height={200}>
@@ -191,7 +191,7 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </div>
         {/* Score distribution */}
-        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+        <div className="glass-strong rounded-xl p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-700 mb-1">Score
             Distribution</h2>
           <p className="text-xs text-slate-400 mb-4">Across all completed
@@ -212,7 +212,7 @@ export default function Dashboard() {
       </div>
       {/* Performance + Engagement */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+        <div className="glass-strong rounded-xl p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-700 mb-4">Assessment
             Performance</h2>
           {[
@@ -231,7 +231,7 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
-        <div className="bg-white rounded-xl border border-slate-100 p-5 shadow-sm">
+        <div className="glass-strong rounded-xl p-5 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-700 mb-4">Candidate
             Engagement</h2>
           {[
@@ -251,7 +251,7 @@ export default function Dashboard() {
         </div>
       </div>
       {/* Recent activity table */}
-      <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+      <div className="glass-strong rounded-xl shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <div>
             <h2 className="text-sm font-semibold text-slate-700">Recent

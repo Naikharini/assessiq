@@ -1,19 +1,11 @@
-export default function StatsCard({
-  title,
-  value,
-  subtitle,
-}) {
+export default function StatsCard({ title, value, subtitle }) {
   return (
-    <div className="bg-white border rounded-xl p-6">
-      <p className="text-gray-600">{title}</p>
- 
-      <h2 className="text-4xl font-bold mt-3">
+    <div className="glass-card rounded-2xl p-6">
+      <p className="text-slate-500 text-sm font-medium">{title}</p>
+      <h2 className="text-4xl font-bold mt-3 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
         {value}
       </h2>
- 
-      <p className="text-gray-400 mt-2">
-        {subtitle}
-      </p>
+      <p className="text-slate-400 mt-2 text-sm">{subtitle}</p>
     </div>
   );
 }

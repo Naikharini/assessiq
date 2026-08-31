@@ -8,8 +8,10 @@ import Dashboard from "./Dashboard";
 import ManageAssessments from "./ManageAssessments";
 import CreateAssessment from "./CreateAssessment";
 import ManageResults from "./ManageResults";
+import { useAuthGuard } from "../../lib/auth";
 
 export default function AppShell() {
+  useAuthGuard("admin", "/admin/login");
   const [activePage, setActivePage] = useState("dashboard");
 
   const renderPage = () => {
@@ -32,7 +34,7 @@ export default function AppShell() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen mesh-content">
      
       <Sidebar
         activePage={activePage}

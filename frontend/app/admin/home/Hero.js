@@ -4,7 +4,7 @@ import Link from "next/link";
 
 export default function Hero() {
   return (
-    <section className="py-24 text-center bg-white">
+    <section className="py-24 text-center mesh-content">
       {/* Back to Home */}
             <div className="fixed top-6 left-6 z-50">
   <Link
@@ -14,7 +14,7 @@ export default function Hero() {
     ← Back to Home
   </Link>
 </div>
-      <span className="px-3 py-1 text-xs rounded-full bg-blue-50 text-blue-600">
+      <span className="px-3 py-1 text-xs rounded-full glass-badge text-indigo-700 font-medium">
         Admin Portal
       </span>
 
@@ -31,7 +31,7 @@ export default function Hero() {
 
       <Link
         href="/admin/login"
-        className="inline-block px-6 py-3 mt-8 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+        className="inline-block px-6 py-3 mt-8 glass-btn rounded-xl font-medium"
       >
         Access Admin Dashboard
       </Link>

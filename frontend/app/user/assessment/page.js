@@ -5,117 +5,87 @@ import { useRouter } from "next/navigation";
 
 import DashboardNavbar from "../../components/user/DashboardNavbar";
 import DashboardSidebar from "../../components/user/DashboardSidebar";
+import { apiFetch } from "../../lib/api";
+import { useAuthGuard } from "../../lib/auth";
+import { SKILLS, getDefaultTopic, getTopicsForSkill } from "../../lib/skills";
 
 export default function AssessmentPage() {
   const router = useRouter();
+  useAuthGuard("user");
 
   const [skill, setSkill] = useState("React");
-  const [topic, setTopic] = useState("Hooks");
+  const [topic, setTopic] = useState(getDefaultTopic("React"));
   const [difficulty, setDifficulty] = useState("Beginner");
-  const [questionCount, setQuestionCount] = useState(10);
-
+  const [questionCount, setQuestionCount] = useState(3);
   const [loading, setLoading] = useState(false);
+
+  const topics = getTopicsForSkill(skill);
+
+  const handleSkillChange = (nextSkill) => {
+    setSkill(nextSkill);
+    setTopic(getDefaultTopic(nextSkill));
+  };
 
   const handleStartAssessment = async () => {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/assessment/generate",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            skill,
-            topic,
-            difficulty,
-            questionCount,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.message || "Failed to generate assessment");
-        setLoading(false);
-        return;
-      }
-
-    
-      sessionStorage.setItem(
-        "questions",
-        JSON.stringify(data.questions)
-      );
-
-     
-      sessionStorage.setItem(
-        "assessment",
-        JSON.stringify({
+      const data = await apiFetch("/api/ai/generate-assessment", {
+        method: "POST",
+        body: JSON.stringify({
           skill,
           topic,
           difficulty,
           questionCount,
+        }),
+      });
+
+      sessionStorage.setItem("questions", JSON.stringify(data.questions));
+      sessionStorage.setItem(
+        "assessment",
+        JSON.stringify({
+          id: data.assessment.id,
+          skill: data.assessment.skill,
+          topic: data.assessment.topic,
+          difficulty: data.assessment.difficulty,
+          questionCount: data.assessment.questionCount,
         })
       );
 
       router.push("/user/test");
     } catch (err) {
-      console.log(err);
-      alert("Server Error");
+      console.error(err);
+      alert(err.message || "Failed to generate assessment");
     }
 
     setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen mesh-content">
       <DashboardNavbar />
 
       <div className="max-w-7xl mx-auto flex gap-6 px-4 py-6">
         <DashboardSidebar />
 
         <div className="flex-1">
-
           <div className="mb-6">
-            <h1 className="text-3xl font-bold text-black">
-              Create New Assessment
-            </h1>
-
-            <p className="text-gray-600">
-              Configure your AI-powered assessment
+            <h1 className="text-3xl font-bold text-slate-900">Create New Assessment</h1>
+            <p className="text-slate-500 mt-1">
+              Select your skills — AI will generate a short quiz (max 5 questions)
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl border p-6">
-
-            {/* Skill */}
-
-            <h2 className="font-semibold text-black mb-3">
-              Select Skill
-            </h2>
+          <div className="glass-strong rounded-2xl p-6">
+            <h2 className="font-semibold text-black mb-3">Select Skill</h2>
 
             <div className="grid grid-cols-3 gap-3 mb-6">
-              {[
-                "React",
-                "JavaScript",
-                "Python",
-                "Java",
-                "Node.js",
-                "SQL",
-                "C++",
-                "Machine Learning",
-                "DSA",
-              ].map((item) => (
+              {SKILLS.map((item) => (
                 <button
                   key={item}
-                  onClick={() => setSkill(item)}
-                  className={`border border-gray-200 rounded-lg py-3 ${
-                    skill === item
-                      ? "bg-blue-500 text-white border border-blue-400"
-                      : "hover:bg-gray-100 text-gray-500"
+                  onClick={() => handleSkillChange(item)}
+                  className={`glass-skill-btn rounded-xl py-3 text-sm font-medium ${
+                    skill === item ? "glass-skill-btn-active" : "text-slate-600"
                   }`}
                 >
                   {item}
@@ -123,28 +93,15 @@ export default function AssessmentPage() {
               ))}
             </div>
 
-            {/* Topic */}
-
-            <h2 className="font-semibold text-black mb-3">
-              Select Topic
-            </h2>
+            <h2 className="font-semibold text-black mb-3">Select Topic</h2>
 
             <div className="grid grid-cols-2 gap-3 mb-6">
-              {[
-                "Hooks",
-                "State Management",
-                "Lifecycle",
-                "Components",
-                "OOP",
-                "Data Structures",
-              ].map((item) => (
+              {topics.map((item) => (
                 <button
                   key={item}
                   onClick={() => setTopic(item)}
-                  className={`border border-gray-200 rounded-lg py-3 ${
-                    topic === item
-                      ? "bg-blue-500 text-white border border-blue-400"
-                      : "hover:bg-gray-100 text-gray-500"
+                  className={`glass-skill-btn rounded-xl py-3 text-sm font-medium ${
+                    topic === item ? "glass-skill-btn-active" : "text-slate-600"
                   }`}
                 >
                   {item}
@@ -152,21 +109,15 @@ export default function AssessmentPage() {
               ))}
             </div>
 
-            {/* Difficulty */}
-
-            <h2 className="font-semibold text-black mb-3">
-              Difficulty
-            </h2>
+            <h2 className="font-semibold text-black mb-3">Difficulty</h2>
 
             <div className="flex gap-3 mb-6">
               {["Beginner", "Intermediate", "Advanced"].map((item) => (
                 <button
                   key={item}
                   onClick={() => setDifficulty(item)}
-                  className={`border border-gray-200 px-5 py-2 rounded-lg ${
-                    difficulty === item
-                      ? "bg-blue-500 text-white"
-                      : "hover:bg-gray-100 text-gray-500"
+                  className={`glass-skill-btn px-5 py-2 rounded-xl text-sm font-medium ${
+                    difficulty === item ? "glass-skill-btn-active" : "text-slate-600"
                   }`}
                 >
                   {item}
@@ -174,21 +125,17 @@ export default function AssessmentPage() {
               ))}
             </div>
 
-            {/* Questions */}
-
             <h2 className="font-semibold text-black mb-3">
-              Number of Questions
+              Number of Questions (max 5)
             </h2>
 
             <div className="flex gap-3 mb-6">
-              {[5, 10, 15, 20].map((item) => (
+              {[3, 4, 5].map((item) => (
                 <button
                   key={item}
                   onClick={() => setQuestionCount(item)}
-                  className={`border border-gray-200 px-5 py-2 rounded-lg ${
-                    questionCount === item
-                      ? "bg-blue-500 text-white"
-                      : "hover:bg-gray-100 text-gray-500"
+                  className={`glass-skill-btn px-5 py-2 rounded-xl text-sm font-medium ${
+                    questionCount === item ? "glass-skill-btn-active" : "text-slate-600"
                   }`}
                 >
                   {item}
@@ -196,25 +143,19 @@ export default function AssessmentPage() {
               ))}
             </div>
 
-            {/* Preview */}
-
-            <div className="bg-blue-50 rounded-xl p-5 mb-6">
+            <div className="glass-banner rounded-xl p-5 mb-6">
               <h2 className="font-semibold text-lg text-blue-700 mb-4">
                 Assessment Preview
               </h2>
-
               <p className="text-gray-700">
                 <strong>Skill:</strong> {skill}
               </p>
-
               <p className="text-gray-700">
                 <strong>Topic:</strong> {topic}
               </p>
-
               <p className="text-gray-700">
                 <strong>Difficulty:</strong> {difficulty}
               </p>
-
               <p className="text-gray-700">
                 <strong>Questions:</strong> {questionCount}
               </p>
@@ -223,13 +164,10 @@ export default function AssessmentPage() {
             <button
               onClick={handleStartAssessment}
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl"
+              className="glass-btn px-8 py-3 rounded-xl disabled:opacity-60 font-medium"
             >
-              {loading
-                ? "Generating Questions..."
-                : "Start Assessment"}
+              {loading ? "Generating Questions..." : "Start Assessment"}
             </button>
-
           </div>
         </div>
       </div>

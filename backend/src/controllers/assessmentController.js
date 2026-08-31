@@ -3,9 +3,6 @@ const db = require("../models");
 const Assessment = db.Assessment;
 const Question = db.Question;
 
-// ============================
-// Create Assessment
-// ============================
 exports.createAssessment = async (req, res) => {
   try {
     const {
@@ -19,10 +16,11 @@ exports.createAssessment = async (req, res) => {
       instructions,
       scheduleDate,
       assignTo,
+      skills,
+      topic,
       questions,
     } = req.body;
 
-    // Create Assessment
     const assessment = await Assessment.create({
       name,
       jobRole,
@@ -34,9 +32,12 @@ exports.createAssessment = async (req, res) => {
       instructions,
       scheduleDate,
       assignTo,
+      skills: skills || jobRole,
+      topic,
+      createdBy: "admin",
+      adminId: req.user?.id || null,
     });
 
-    // Create Questions
     if (questions && questions.length > 0) {
       const questionData = questions.map((q) => ({
         assessmentId: assessment.id,
@@ -60,7 +61,6 @@ exports.createAssessment = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -68,13 +68,10 @@ exports.createAssessment = async (req, res) => {
   }
 };
 
-
-// Get All Assessments
-
 exports.getAllAssessments = async (req, res) => {
   try {
     const assessments = await Assessment.findAll({
-      include: [Question],
+      include: [{ model: Question, as: "questions" }],
       order: [["createdAt", "DESC"]],
     });
 
@@ -84,7 +81,6 @@ exports.getAllAssessments = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       success: false,
       message: error.message,
@@ -92,12 +88,10 @@ exports.getAllAssessments = async (req, res) => {
   }
 };
 
-// Get Assessment By Id
-
 exports.getAssessmentById = async (req, res) => {
   try {
     const assessment = await Assessment.findByPk(req.params.id, {
-      include: [Question],
+      include: [{ model: Question, as: "questions" }],
     });
 
     if (!assessment) {
@@ -113,16 +107,12 @@ exports.getAssessmentById = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-
     return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
-
-
-// Delete Assessment
 
 exports.deleteAssessment = async (req, res) => {
   try {
@@ -143,7 +133,74 @@ exports.deleteAssessment = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
+exports.getAssignedAssessments = async (req, res) => {
+  try {
+    const email = req.user.email;
+    const { Op } = db.Sequelize;
+
+    const assessments = await Assessment.findAll({
+      where: {
+        [Op.or]: [{ assignTo: email }, { userId: req.user.id }],
+      },
+      include: [{ model: Question, as: "questions" }],
+      order: [["createdAt", "DESC"]],
+    });
+
+    return res.json({ success: true, assessments });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.getCandidateStats = async (req, res) => {
+  try {
+    const attempts = await db.AssessmentAttempt.findAll({
+      where: { userId: req.user.id },
+      include: [
+        {
+          model: Assessment,
+          attributes: ["id", "name", "skills", "topic", "difficulty"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    const total = attempts.length;
+    const avg =
+      total > 0
+        ? Math.round(
+            attempts.reduce((sum, a) => sum + (a.percentage || 0), 0) / total
+          )
+        : 0;
+
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const thisWeek = attempts.filter(
+      (a) => new Date(a.createdAt) >= weekAgo
+    ).length;
+
+    return res.json({
+      success: true,
+      stats: {
+        totalAssessments: total,
+        averageScore: avg,
+        thisWeek,
+      },
+      recentAttempts: attempts,
+    });
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({
       success: false,
       message: error.message,
