@@ -8,6 +8,7 @@ const {
   getAllAssessments,
   getAssessmentById,
   deleteAssessment,
+  updateAssessment,
   getAssignedAssessments,
   getCandidateStats,
 } = require("../controllers/assessmentController");
@@ -41,6 +42,13 @@ router.get(
 );
 
 router.get("/:id", authMiddleware, getAssessmentById);
+
+router.put(
+  "/:id",
+  authMiddleware,
+  requireRole("admin"),
+  updateAssessment
+);
 
 router.delete(
   "/:id",

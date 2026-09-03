@@ -13,6 +13,12 @@ import { useAuthGuard } from "../../lib/auth";
 export default function AppShell() {
   useAuthGuard("admin", "/admin/login");
   const [activePage, setActivePage] = useState("dashboard");
+  const [editData, setEditData] = useState(null);
+
+  const handleNavigateCreate = (data = null) => {
+    setEditData(data);
+    setActivePage("create");
+  };
 
   const renderPage = () => {
     switch (activePage) {
@@ -20,10 +26,23 @@ export default function AppShell() {
         return <Dashboard />;
 
       case "manage":
-        return <ManageAssessments />;
+        return (
+          <ManageAssessments
+            onEdit={(assessment) => handleNavigateCreate(assessment)}
+            onCreateNew={() => handleNavigateCreate(null)}
+          />
+        );
 
       case "create":
-        return <CreateAssessment />;
+        return (
+          <CreateAssessment
+            assessmentData={editData}
+            onBack={() => {
+              setEditData(null);
+              setActivePage("manage");
+            }}
+          />
+        );
 
       case "results":
         return <ManageResults />;
@@ -35,14 +54,16 @@ export default function AppShell() {
 
   return (
     <div className="flex h-screen mesh-content">
-     
       <Sidebar
         activePage={activePage}
-        setActivePage={setActivePage}
+        setActivePage={(page) => {
+          setEditData(null);
+          setActivePage(page);
+        }}
       />
 
       <main className="flex-1 overflow-y-auto p-6">
-         <Header />
+        <Header />
         {renderPage()}
       </main>
     </div>
