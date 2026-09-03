@@ -8,6 +8,7 @@ import {
   Clock,
   TrendingUp,
   HelpCircle,
+  Download,
   RefreshCw,
 } from "lucide-react";
 import {
@@ -50,6 +51,76 @@ export default function Dashboard() {
   useEffect(() => {
     fetchStats();
   }, []);
+
+  const exportReport = () => {
+    if (!data) {
+      alert("No data available to export.");
+      return;
+    }
+
+    const summaryHeaders = ["Metric", "Value"];
+    const summaryRows = [
+      ["Total Assessments", data.stats?.totalAssessments ?? 0],
+      ["Total Questions", data.stats?.totalQuestions ?? 0],
+      ["Registered Candidates", data.stats?.totalCandidates ?? 0],
+      ["Total Attempts", data.stats?.totalAttempts ?? 0],
+      ["Average Score", `${data.stats?.averageScore ?? 0}%`],
+      ["Pass Rate", `${data.stats?.passRate ?? 0}%`],
+      ["Active Candidates", data.stats?.activeCandidates ?? 0],
+      ["Most Attempted Assessment", data.performance?.mostAttempted || "—"],
+      ["Highest Scoring Assessment", data.performance?.highestScoring || "—"],
+      ["Lowest Scoring Assessment", data.performance?.lowestScoring || "—"],
+    ];
+
+    const escapeCell = (val) => {
+      if (val === null || val === undefined) return '""';
+      const str = String(val).replace(/"/g, '""');
+      return `"${str}"`;
+    };
+
+    const csvLines = [
+      "=== PLATFORM SUMMARY ===",
+      summaryHeaders.join(","),
+      ...summaryRows.map(([k, v]) => `${escapeCell(k)},${escapeCell(v)}`),
+      "",
+      "=== RECENT SUBMISSIONS ===",
+      [
+        "Candidate",
+        "Assessment",
+        "Difficulty",
+        "Score",
+        "Duration",
+        "Completed At",
+        "Status",
+      ].join(","),
+      ...(data.recentActivity || []).map((r) =>
+        [
+          escapeCell(r.candidate),
+          escapeCell(r.assessment),
+          escapeCell(r.difficulty),
+          escapeCell(r.pct),
+          escapeCell(r.time),
+          escapeCell(r.completed),
+          escapeCell(r.status),
+        ].join(",")
+      ),
+    ];
+
+    const blob = new Blob([csvLines.join("\r\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `Admin_Overview_Report_${new Date().toISOString().slice(0, 10)}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
   const statsList = [
     {
@@ -130,9 +201,16 @@ export default function Dashboard() {
           <button
             onClick={fetchStats}
             title="Refresh metrics"
-            className="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-sm text-slate-600 hover:bg-slate-50 transition-colors cursor-pointer"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} /> Refresh
+          </button>
+          <button
+            onClick={exportReport}
+            title="Export platform analytics and submissions as CSV"
+            className="flex items-center gap-1.5 bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors cursor-pointer"
+          >
+            <Download size={14} /> Export Report
           </button>
         </div>
       </div>
