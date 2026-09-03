@@ -9,6 +9,7 @@ import {
   Plus,
   X,
   CheckCircle,
+  Calendar,
 } from "lucide-react";
 import { apiFetch } from "../../lib/api";
 
@@ -40,6 +41,33 @@ export default function ManageAssessments({ onEdit, onCreateNew }) {
     }
   };
 
+  const formatScheduleBadge = (scheduleDate) => {
+    if (!scheduleDate) {
+      return {
+        label: "Published",
+        style: "bg-green-50 border border-green-200 text-green-700",
+      };
+    }
+    const isFuture = new Date(scheduleDate).getTime() > Date.now();
+    const formatted = new Date(scheduleDate).toLocaleDateString([], {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    if (isFuture) {
+      return {
+        label: `Scheduled (${formatted})`,
+        style: "bg-amber-50 border border-amber-200 text-amber-800 font-medium",
+      };
+    }
+    return {
+      label: "Active (Past Schedule)",
+      style: "bg-blue-50 border border-blue-200 text-blue-700",
+    };
+  };
+
   const filtered = assessments.filter((item) =>
     item.name?.toLowerCase().includes(search.toLowerCase())
   );
@@ -53,7 +81,7 @@ export default function ManageAssessments({ onEdit, onCreateNew }) {
             Manage Assessments
           </h1>
           <p className="text-slate-500 text-sm mt-1">
-            View, edit and manage published assessments.
+            View, edit, schedule and manage published assessments.
           </p>
         </div>
 
@@ -83,77 +111,87 @@ export default function ManageAssessments({ onEdit, onCreateNew }) {
           <thead className="glass-subtle">
             <tr className="text-left text-sm text-slate-600">
               <th className="px-5 py-4">Assessment</th>
+              <th className="px-5 py-4">Department</th>
               <th className="px-5 py-4">Difficulty</th>
               <th className="px-5 py-4">Questions</th>
               <th className="px-5 py-4">Duration</th>
-              <th className="px-5 py-4">Status</th>
+              <th className="px-5 py-4">Schedule / Status</th>
               <th className="px-5 py-4 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={6} className="text-center py-10 text-gray-400">
+                <td colSpan={7} className="text-center py-10 text-gray-400">
                   No Assessments Found
                 </td>
               </tr>
             ) : (
-              filtered.map((item) => (
-                <tr key={item.id} className="border-t hover:bg-slate-50">
-                  <td className="px-5 py-4 font-medium text-slate-800">
-                    {item.name}
-                  </td>
-                  <td className="px-5 py-4 text-slate-600">
-                    {item.department}
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
-                      {item.difficulty}
-                    </span>
-                  </td>
-                  <td className="px-5 py-4 text-slate-600">
-                    {item.questions?.length || 0}
-                  </td>
-                  <td className="px-5 py-4 text-slate-600">
-                    {item.duration} min
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs">
-                      Published
-                    </span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex justify-center gap-2">
-                      {/* View */}
-                      <button
-                        onClick={() => setViewItem(item)}
-                        title="View Details"
-                        className="p-2 rounded-lg hover:bg-slate-200 text-slate-600"
-                      >
-                        <Eye size={17} />
-                      </button>
+              filtered.map((item) => {
+                const statusInfo = formatScheduleBadge(item.scheduleDate);
 
-                      {/* Edit */}
-                      <button
-                        onClick={() => onEdit?.(item)}
-                        title="Edit Assessment"
-                        className="p-2 rounded-lg hover:bg-yellow-100 text-yellow-600"
-                      >
-                        <Pencil size={17} />
-                      </button>
+                return (
+                  <tr key={item.id} className="border-t hover:bg-slate-50">
+                    <td className="px-5 py-4 font-medium text-slate-800">
+                      <div>{item.name}</div>
+                      {item.assignTo && (
+                        <div className="text-xs text-slate-400 font-normal mt-0.5">
+                          Assigned to: {item.assignTo}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-5 py-4 text-slate-600">
+                      {item.department || "General"}
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs">
+                        {item.difficulty}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-slate-600">
+                      {item.questions?.length || 0}
+                    </td>
+                    <td className="px-5 py-4 text-slate-600">
+                      {item.duration} min
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs ${statusInfo.style}`}>
+                        {statusInfo.label}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex justify-center gap-2">
+                        {/* View */}
+                        <button
+                          onClick={() => setViewItem(item)}
+                          title="View Details"
+                          className="p-2 rounded-lg hover:bg-slate-200 text-slate-600"
+                        >
+                          <Eye size={17} />
+                        </button>
 
-                      {/* Delete */}
-                      <button
-                        onClick={() => deleteAssessment(item.id)}
-                        title="Delete"
-                        className="p-2 rounded-lg hover:bg-red-100 text-red-600"
-                      >
-                        <Trash2 size={17} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+                        {/* Edit */}
+                        <button
+                          onClick={() => onEdit?.(item)}
+                          title="Edit Assessment"
+                          className="p-2 rounded-lg hover:bg-yellow-100 text-yellow-600"
+                        >
+                          <Pencil size={17} />
+                        </button>
+
+                        {/* Delete */}
+                        <button
+                          onClick={() => deleteAssessment(item.id)}
+                          title="Delete"
+                          className="p-2 rounded-lg hover:bg-red-100 text-red-600"
+                        >
+                          <Trash2 size={17} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -192,12 +230,19 @@ export default function ManageAssessments({ onEdit, onCreateNew }) {
             {/* Meta grid */}
             <div className="grid grid-cols-2 gap-4 mb-6">
               {[
-                ["Department", viewItem.department],
+                ["Department", viewItem.department || "General"],
                 ["Difficulty", viewItem.difficulty],
                 ["Duration", `${viewItem.duration} min`],
                 ["Passing Score", `${viewItem.passingScore}%`],
                 ["Questions", viewItem.questions?.length || 0],
-                ["Job Role", viewItem.jobRole || "-"],
+                ["Job Role / Skills", viewItem.jobRole || viewItem.skills || "—"],
+                [
+                  "Scheduled Start",
+                  viewItem.scheduleDate
+                    ? new Date(viewItem.scheduleDate).toLocaleString()
+                    : "Immediate (Unscheduled)",
+                ],
+                ["Assigned Candidate", viewItem.assignTo || "Open (All)"],
               ].map(([label, value]) => (
                 <div key={label} className="bg-slate-50 rounded-xl px-4 py-3">
                   <p className="text-xs text-slate-400 mb-0.5">{label}</p>

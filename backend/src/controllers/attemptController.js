@@ -52,6 +52,14 @@ exports.submitAttempt = async (req, res) => {
       });
     }
 
+    // Schedule date enforcement
+    if (assessment.scheduleDate && new Date(assessment.scheduleDate).getTime() > Date.now()) {
+      return res.status(403).json({
+        success: false,
+        message: `This assessment is scheduled to start on ${new Date(assessment.scheduleDate).toLocaleString()}.`,
+      });
+    }
+
     const questions = assessment.questions || [];
     const result = scoreAnswers(questions, answers || {});
 
@@ -86,6 +94,7 @@ exports.submitAttempt = async (req, res) => {
           skill: assessment.skills || assessment.jobRole,
           topic: assessment.topic,
           difficulty: assessment.difficulty,
+          duration: assessment.duration,
         },
         user,
       },
@@ -106,7 +115,7 @@ exports.getMyAttempts = async (req, res) => {
       include: [
         {
           model: Assessment,
-          attributes: ["id", "name", "skills", "topic", "difficulty", "passingScore"],
+          attributes: ["id", "name", "skills", "topic", "difficulty", "passingScore", "duration"],
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -132,7 +141,7 @@ exports.getAllAttempts = async (req, res) => {
         },
         {
           model: Assessment,
-          attributes: ["id", "name", "skills", "topic", "difficulty", "passingScore"],
+          attributes: ["id", "name", "skills", "topic", "difficulty", "passingScore", "duration"],
         },
       ],
       order: [["createdAt", "DESC"]],
@@ -203,6 +212,18 @@ exports.getAssessmentForTest = async (req, res) => {
       });
     }
 
+    // Check if scheduled in future for non-admin candidate
+    if (req.user?.role !== "admin" && assessment.scheduleDate) {
+      const scheduledTime = new Date(assessment.scheduleDate).getTime();
+      const now = Date.now();
+      if (scheduledTime > now) {
+        return res.status(403).json({
+          success: false,
+          message: `This assessment is scheduled for ${new Date(assessment.scheduleDate).toLocaleString()}. Please wait until the scheduled start time.`,
+        });
+      }
+    }
+
     const questions = assessment.questions || [];
 
     return res.json({
@@ -214,6 +235,7 @@ exports.getAssessmentForTest = async (req, res) => {
         topic: assessment.topic,
         difficulty: assessment.difficulty,
         duration: assessment.duration,
+        scheduleDate: assessment.scheduleDate,
       },
       questions: dbToFrontendQuestions(questions),
     });

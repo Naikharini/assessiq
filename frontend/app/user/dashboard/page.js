@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Calendar, Clock, Lock, CheckCircle2, Play } from "lucide-react";
 
 import DashboardNavbar from "../../components/user/DashboardNavbar";
 import DashboardSidebar from "../../components/user/DashboardSidebar";
@@ -22,6 +23,13 @@ export default function Dashboard() {
   });
   const [recentAttempts, setRecentAttempts] = useState([]);
   const [assigned, setAssigned] = useState([]);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  // Keep current time updated for live schedule unlocking
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 10000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -41,7 +49,33 @@ export default function Dashboard() {
     load();
   }, []);
 
+  const isScheduleActive = (scheduleDate) => {
+    if (!scheduleDate) return true;
+    return new Date(scheduleDate).getTime() <= currentTime;
+  };
+
+  const formatSchedule = (scheduleDate) => {
+    if (!scheduleDate) return "Available Now";
+    const d = new Date(scheduleDate);
+    return d.toLocaleString([], {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const startAssignedTest = async (assessment) => {
+    if (!isScheduleActive(assessment.scheduleDate)) {
+      alert(
+        `This assessment is scheduled to start on ${new Date(
+          assessment.scheduleDate
+        ).toLocaleString()}.`
+      );
+      return;
+    }
+
     try {
       const data = await apiFetch(`/api/attempts/assessment/${assessment.id}`);
       sessionStorage.setItem("questions", JSON.stringify(data.questions));
@@ -53,6 +87,7 @@ export default function Dashboard() {
           topic: data.assessment.topic,
           difficulty: data.assessment.difficulty,
           questionCount: data.questions.length,
+          duration: data.assessment.duration || assessment.duration || 45,
         })
       );
       router.push("/user/test");
@@ -115,26 +150,69 @@ export default function Dashboard() {
                 Assigned Assessments
               </h2>
               <div className="space-y-4">
-                {assigned.map((item) => (
-                  <div
-                    key={item.id}
-                    className="glass-card rounded-2xl p-5 flex justify-between items-center"
-                  >
-                    <div>
-                      <h3 className="font-semibold text-black">{item.name}</h3>
-                      <p className="text-gray-500 text-sm">
-                        {item.skills || item.jobRole} • {item.difficulty} •{" "}
-                        {item.questions?.length || 0} questions
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => startAssignedTest(item)}
-                      className="glass-btn px-5 py-2 rounded-xl text-sm"
+                {assigned.map((item) => {
+                  const unlocked = isScheduleActive(item.scheduleDate);
+
+                  return (
+                    <div
+                      key={item.id}
+                      className="glass-card rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4"
                     >
-                      Start
-                    </button>
-                  </div>
-                ))}
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-3">
+                          <h3 className="font-semibold text-black text-lg">
+                            {item.name}
+                          </h3>
+                          {item.scheduleDate && !unlocked ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 border border-amber-200 text-amber-700">
+                              <Calendar size={12} /> Scheduled
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 border border-emerald-200 text-emerald-700">
+                              <CheckCircle2 size={12} /> Available
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-gray-500 text-sm">
+                          {item.skills || item.jobRole} • {item.difficulty} •{" "}
+                          {item.questions?.length || 0} questions •{" "}
+                          {item.duration || 45} mins
+                        </p>
+
+                        {item.scheduleDate && (
+                          <p className="text-xs text-slate-500 flex items-center gap-1.5 pt-0.5">
+                            <Clock size={13} className="text-slate-400" />
+                            <span>
+                              {unlocked ? "Started: " : "Scheduled for: "}
+                              <strong className="text-slate-700 font-semibold">
+                                {formatSchedule(item.scheduleDate)}
+                              </strong>
+                            </span>
+                          </p>
+                        )}
+                      </div>
+
+                      <div>
+                        {unlocked ? (
+                          <button
+                            onClick={() => startAssignedTest(item)}
+                            className="glass-btn px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
+                          >
+                            <Play size={14} /> Start Test
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => startAssignedTest(item)}
+                            className="px-5 py-2.5 rounded-xl text-sm font-medium bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center gap-2"
+                          >
+                            <Lock size={14} /> Locked
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </>
           )}

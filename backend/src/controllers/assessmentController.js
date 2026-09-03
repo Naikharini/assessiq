@@ -3,6 +3,14 @@ const db = require("../models");
 const Assessment = db.Assessment;
 const Question = db.Question;
 
+const sanitizeDate = (val) => {
+  if (!val || val === "Invalid date" || val === "" || val === "null" || val === "undefined") {
+    return null;
+  }
+  const d = new Date(val);
+  return isNaN(d.getTime()) ? null : d;
+};
+
 exports.createAssessment = async (req, res) => {
   try {
     const {
@@ -30,7 +38,7 @@ exports.createAssessment = async (req, res) => {
       passingScore,
       description,
       instructions,
-      scheduleDate,
+      scheduleDate: sanitizeDate(scheduleDate),
       assignTo,
       skills: skills || jobRole,
       topic,
@@ -237,7 +245,6 @@ exports.updateAssessment = async (req, res) => {
       questions,
     } = req.body;
 
-    // Update assessment fields
     await assessment.update({
       name,
       jobRole,
@@ -247,13 +254,12 @@ exports.updateAssessment = async (req, res) => {
       passingScore,
       description,
       instructions,
-      scheduleDate,
+      scheduleDate: sanitizeDate(scheduleDate),
       assignTo,
       skills: skills || jobRole,
       topic,
     });
 
-    // Replace questions: delete old ones, bulk create new
     if (questions && Array.isArray(questions)) {
       await Question.destroy({ where: { assessmentId: assessment.id } });
 

@@ -16,6 +16,13 @@ const DEPARTMENTS = [
 const DIFFICULTIES = ["Easy", "Medium", "Hard", "Expert"];
 const CORRECT_OPTIONS = ["A", "B", "C", "D"];
 
+const formatForDateTimeLocal = (dateVal) => {
+  if (!dateVal) return "";
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString().slice(0, 16);
+};
+
 function emptyQuestion() {
   return {
     id: Date.now(),
@@ -44,7 +51,7 @@ export default function CreateAssessment({
     passingScore: assessmentData?.passingScore || 70,
     description: assessmentData?.description || "",
     instructions: assessmentData?.instructions || "",
-    scheduleDate: assessmentData?.scheduleDate || "",
+    scheduleDate: formatForDateTimeLocal(assessmentData?.scheduleDate),
     assignTo: assessmentData?.assignTo || "",
   }));
 
@@ -99,18 +106,21 @@ export default function CreateAssessment({
 
     setPublishing(true);
     try {
+      const payload = {
+        ...form,
+        duration: Number(form.duration),
+        passingScore: Number(form.passingScore),
+        scheduleDate: form.scheduleDate ? form.scheduleDate : null,
+        skills: form.jobRole,
+        questions: questions.map(({ id, ...q }) => q),
+      };
+
       if (isEditMode) {
         await apiFetch(
           `/api/assessment/${assessmentData.id}`,
           {
             method: "PUT",
-            body: JSON.stringify({
-              ...form,
-              duration: Number(form.duration),
-              passingScore: Number(form.passingScore),
-              skills: form.jobRole,
-              questions: questions.map(({ id, ...q }) => q),
-            }),
+            body: JSON.stringify(payload),
           },
           "admin"
         );
@@ -121,13 +131,7 @@ export default function CreateAssessment({
           "/api/assessment/create",
           {
             method: "POST",
-            body: JSON.stringify({
-              ...form,
-              duration: Number(form.duration),
-              passingScore: Number(form.passingScore),
-              skills: form.jobRole,
-              questions: questions.map(({ id, ...q }) => q),
-            }),
+            body: JSON.stringify(payload),
           },
           "admin"
         );

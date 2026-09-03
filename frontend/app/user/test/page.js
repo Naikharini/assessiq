@@ -26,8 +26,15 @@ export default function TestPage() {
       return;
     }
 
-    setQuestions(JSON.parse(storedQuestions || "[]"));
-    setAssessment(JSON.parse(storedAssessment || "{}"));
+    const parsedQuestions = JSON.parse(storedQuestions || "[]");
+    const parsedAssessment = JSON.parse(storedAssessment || "{}");
+
+    setQuestions(parsedQuestions);
+    setAssessment(parsedAssessment);
+
+    if (parsedAssessment?.duration) {
+      setTimeLeft(Number(parsedAssessment.duration) * 60);
+    }
   }, [router]);
 
   useEffect(() => {
@@ -43,7 +50,7 @@ export default function TestPage() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [assessment, answers]);
 
   const formatTime = (sec) => {
     const min = Math.floor(sec / 60);
@@ -94,136 +101,133 @@ export default function TestPage() {
 
   if (!questions.length) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        Loading Assessment...
+      <div className="min-h-screen flex items-center justify-center mesh-content">
+        <p className="text-slate-500">Loading test...</p>
       </div>
     );
   }
 
   const q = questions[current];
-  const answeredCount = Object.keys(answers).length;
-  const progress =
-    questions.length > 0 ? (answeredCount / questions.length) * 100 : 0;
 
   return (
     <div className="min-h-screen mesh-content">
-      <div className="glass-nav sticky top-0 z-40 flex justify-between items-center px-6 py-3">
-        <Image src="/Logo.png" alt="logo" width={140} height={50} />
+      {/* Test header */}
+      <header className="glass-nav sticky top-0 z-40 px-6 py-4 flex justify-between items-center bg-white border-b border-slate-200">
+        <div>
+          <h1 className="font-bold text-slate-800 text-lg">
+            {assessment?.skill || assessment?.name || "Skill Assessment"}
+          </h1>
+          <p className="text-xs text-slate-500">
+            {assessment?.topic ? `${assessment.topic} • ` : ""}{assessment?.difficulty} Level
+          </p>
+        </div>
 
         <div className="flex items-center gap-4">
-          <span
-            className={`font-semibold ${timeLeft < 60 ? "text-red-600 animate-pulse" : ""}`}
-          >
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl font-mono text-sm font-semibold text-slate-700">
             ⏱ {formatTime(timeLeft)}
-          </span>
+          </div>
 
           <button
             onClick={handleSubmit}
             disabled={submitting}
-            className="glass-btn px-4 py-2 rounded-xl text-sm disabled:opacity-60"
+            className="glass-btn px-5 py-2 rounded-xl text-sm font-medium disabled:opacity-60"
           >
-            {submitting ? "Submitting..." : "Submit"}
+            {submitting ? "Submitting..." : "Submit Test"}
           </button>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-4xl mx-auto p-6">
-        <div className="mb-2 text-gray-600 text-sm">
-          {assessment?.skill} • {assessment?.topic} • {assessment?.difficulty}
-        </div>
-
-        <h2 className="font-semibold text-black">
-          Question {current + 1} of {questions.length}
-        </h2>
-
-        <div className="w-full glass-subtle h-2 rounded-full mt-3 overflow-hidden">
-          <div
-            className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        <p className="text-sm text-gray-500 mt-2">
-          {answeredCount} of {questions.length} answered
-        </p>
-
-        <div className="glass-strong p-8 mt-6 rounded-2xl">
-          <h3 className="text-lg font-medium mb-4 text-gray-700">
-            {q.question}
-          </h3>
-
-          <div className="space-y-3">
-            {q.options.map((opt, i) => (
-              <label
-                key={i}
-                className={`flex items-center gap-3 glass-option p-3 rounded-xl cursor-pointer
-                  ${answers[current] === opt ? "glass-option-selected" : ""}`}
-              >
-                <input
-                  type="radio"
-                  name={`q-${current}`}
-                  checked={answers[current] === opt}
-                  onChange={() => handleOption(opt)}
-                />
-                {opt}
-              </label>
-            ))}
+      <main className="max-w-4xl mx-auto p-6 space-y-6">
+        {/* Progress bar */}
+        <div className="glass-strong rounded-xl p-4">
+          <div className="flex justify-between text-xs text-slate-500 mb-2">
+            <span>
+              Question {current + 1} of {questions.length}
+            </span>
+            <span>
+              {Object.keys(answers).length} of {questions.length} Answered
+            </span>
+          </div>
+          <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+            <div
+              className="bg-blue-600 h-2 transition-all duration-300 rounded-full"
+              style={{
+                width: `${((current + 1) / questions.length) * 100}%`,
+              }}
+            />
           </div>
         </div>
 
-        <div className="flex justify-between items-center mt-6">
+        {/* Question Card */}
+        <div className="glass-card rounded-2xl p-7 space-y-6 bg-white border border-slate-200">
+          <div className="flex items-start gap-3">
+            <span className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+              {current + 1}
+            </span>
+            <h2 className="text-lg font-medium text-slate-800 leading-relaxed">
+              {q?.question}
+            </h2>
+          </div>
+
+          <div className="space-y-3 pt-2">
+            {(q?.options || [q?.optionA, q?.optionB, q?.optionC, q?.optionD].filter(Boolean)).map(
+              (opt, i) => {
+                const isSelected = answers[current] === opt;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => handleOption(opt)}
+                    className={`w-full text-left p-4 rounded-xl border text-sm font-medium transition-all flex items-center gap-3 ${
+                      isSelected
+                        ? "bg-blue-50 border-blue-500 text-blue-800 shadow-sm"
+                        : "bg-white hover:bg-slate-50 border-slate-200 text-slate-700"
+                    }`}
+                  >
+                    <span
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                        isSelected
+                          ? "bg-blue-600 text-white"
+                          : "bg-slate-100 text-slate-500"
+                      }`}
+                    >
+                      {String.fromCharCode(65 + i)}
+                    </span>
+                    <span className="flex-1">{opt}</span>
+                  </button>
+                );
+              }
+            )}
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <div className="flex justify-between items-center pt-2">
           <button
             onClick={prev}
             disabled={current === 0}
-            className={`px-5 py-2 rounded-xl text-sm font-medium transition
-              ${
-                current === 0
-                  ? "glass-subtle text-slate-400 cursor-not-allowed"
-                  : "glass-btn-outline"
-              }
-            `}
+            className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Previous
+            ← Previous
           </button>
 
-          {current === questions.length - 1 ? (
+          {current < questions.length - 1 ? (
             <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              className="px-5 py-2 rounded-xl text-sm font-medium bg-emerald-500/90 text-white hover:bg-emerald-600 disabled:opacity-60 backdrop-blur"
+              onClick={next}
+              className="glass-btn px-6 py-2.5 rounded-xl text-sm font-medium"
             >
-              {submitting ? "Submitting..." : "Submit"}
+              Next →
             </button>
           ) : (
             <button
-              onClick={next}
-              className="px-5 py-2 rounded-xl text-sm font-medium glass-btn"
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="glass-btn px-6 py-2.5 rounded-xl text-sm font-medium disabled:opacity-60"
             >
-              Next
+              {submitting ? "Submitting..." : "Finish Test"}
             </button>
           )}
         </div>
-
-        <div className="mt-6 flex flex-wrap gap-2">
-          {questions.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              className={`w-10 h-10 rounded-xl transition text-sm font-medium
-                ${
-                  current === i
-                    ? "glass-active"
-                    : answers[i] !== undefined
-                      ? "glass-subtle border-emerald-400/50 text-emerald-600"
-                      : "glass-subtle text-slate-600"
-                }
-              `}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
-      </div>
+      </main>
     </div>
   );
 }
