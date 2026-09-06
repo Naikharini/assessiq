@@ -3,6 +3,8 @@ const cors = require("cors");
 
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const assessmentRoutes = require("./routes/assessmentRoutes");
+const attemptRoutes = require("./routes/attemptRoutes");
 
 const app = express();
 app.use(cors({
@@ -18,6 +20,8 @@ app.get("/", (req, res) => {
 
 app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/assessment", assessmentRoutes);
+app.use("/api/attempts", attemptRoutes);
 
 
 const PORT = process.env.PORT || 5000;

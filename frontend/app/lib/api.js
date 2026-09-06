@@ -14,6 +14,7 @@ export function setToken(token, role = "user") {
 }
 
 export async function apiFetch(path, options = {}, role = "user") {
+  console.log("role:------------------------------------", role);
   const token = getToken(role);
   const headers = {
     "Content-Type": "application/json",
@@ -28,6 +29,8 @@ export async function apiFetch(path, options = {}, role = "user") {
     ...options,
     headers,
   });
+
+  console.log("API Fetch:", `${API_URL}${path}`, options, res.status);
 
   const data = await res.json().catch(() => ({}));
 

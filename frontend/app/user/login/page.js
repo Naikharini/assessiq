@@ -36,8 +36,7 @@ export default function UserLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 mesh-content relative">
-      <div className="glass-orb w-72 h-72 bg-indigo-400 top-10 left-10" />
-      <div className="glass-orb w-56 h-56 bg-blue-400 bottom-10 right-10" />
+     
 
       <div className="w-full max-w-md glass-strong rounded-3xl p-8 relative z-10">
         <div className="flex justify-center mb-6">

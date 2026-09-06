@@ -40,8 +40,7 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 mesh-content relative">
-      <div className="glass-orb w-80 h-80 bg-violet-400 top-5 right-10" />
-      <div className="glass-orb w-64 h-64 bg-indigo-400 bottom-5 left-10" />
+      
 
       <div className="w-full max-w-md glass-strong rounded-3xl p-8 relative z-10">
         <div className="flex justify-center mb-6">
