@@ -90,6 +90,8 @@ export default function TestPage() {
         }),
       });
 
+      sessionStorage.removeItem("questions");
+      sessionStorage.removeItem("assessment");
       sessionStorage.setItem("attemptResult", JSON.stringify(data.attempt));
       router.push("/user/result");
     } catch (err) {

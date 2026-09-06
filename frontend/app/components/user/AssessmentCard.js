@@ -1,6 +1,18 @@
-export default function AssessmentCard({ title, level, topic, score, percent }) {
+export default function AssessmentCard({
+  title,
+  level,
+  topic,
+  score,
+  percent,
+  onClick,
+}) {
   return (
-    <div className="glass-card rounded-2xl p-5 flex justify-between items-center">
+    <div
+      onClick={onClick}
+      className={`glass-card rounded-2xl p-5 flex justify-between items-center transition ${
+        onClick ? "cursor-pointer hover:border-blue-300 hover:shadow-md" : ""
+      }`}
+    >
       <div>
         <h3 className="font-bold text-slate-900">{title}</h3>
         <p className="text-slate-500 text-sm mt-1">

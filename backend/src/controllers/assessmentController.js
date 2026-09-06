@@ -157,11 +157,38 @@ exports.getAssignedAssessments = async (req, res) => {
       where: {
         [Op.or]: [{ assignTo: email }, { userId: req.user.id }],
       },
-      include: [{ model: Question, as: "questions" }],
+      include: [
+        { model: Question, as: "questions" },
+        {
+          model: db.AssessmentAttempt,
+          where: { userId: req.user.id },
+          required: false,
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
 
-    return res.json({ success: true, assessments });
+    const formattedAssessments = assessments.map((assessment) => {
+      const plain = assessment.toJSON();
+      const attempts = plain.AssessmentAttempts || [];
+      const completedAttempts = attempts.filter((a) => a.status === "completed");
+      const latestAttempt =
+        completedAttempts.length > 0
+          ? completedAttempts[completedAttempts.length - 1]
+          : attempts.length > 0
+          ? attempts[attempts.length - 1]
+          : null;
+
+      const isCompleted = completedAttempts.length > 0;
+
+      return {
+        ...plain,
+        isCompleted,
+        latestAttempt,
+      };
+    });
+
+    return res.json({ success: true, assessments: formattedAssessments });
   } catch (error) {
     console.error(error);
     return res.status(500).json({

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Clock, Lock, CheckCircle2, Play } from "lucide-react";
+import { Calendar, Clock, Lock, CheckCircle2, Play, Eye } from "lucide-react";
 
 import DashboardNavbar from "../../components/user/DashboardNavbar";
 import DashboardSidebar from "../../components/user/DashboardSidebar";
@@ -66,7 +66,26 @@ export default function Dashboard() {
     });
   };
 
+  const viewAttemptResult = async (attemptId) => {
+    if (!attemptId) return;
+    try {
+      const data = await apiFetch(`/api/attempts/${attemptId}`);
+      if (data.attempt) {
+        sessionStorage.setItem("attemptResult", JSON.stringify(data.attempt));
+        router.push("/user/result");
+      }
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Failed to load attempt result");
+    }
+  };
+
   const startAssignedTest = async (assessment) => {
+    if (assessment.isCompleted && assessment.latestAttempt) {
+      await viewAttemptResult(assessment.latestAttempt.id);
+      return;
+    }
+
     if (!isScheduleActive(assessment.scheduleDate)) {
       alert(
         `This assessment is scheduled to start on ${new Date(
@@ -92,6 +111,10 @@ export default function Dashboard() {
       );
       router.push("/user/test");
     } catch (err) {
+      if (err.alreadyCompleted && err.attemptId) {
+        await viewAttemptResult(err.attemptId);
+        return;
+      }
       alert(err.message || "Failed to load assessment");
     }
   };
@@ -151,6 +174,11 @@ export default function Dashboard() {
               </h2>
               <div className="space-y-4">
                 {assigned.map((item) => {
+                  const isCompleted = Boolean(
+                    item.isCompleted ||
+                      (item.latestAttempt &&
+                        item.latestAttempt.status === "completed")
+                  );
                   const unlocked = isScheduleActive(item.scheduleDate);
 
                   return (
@@ -163,7 +191,11 @@ export default function Dashboard() {
                           <h3 className="font-semibold text-black text-lg">
                             {item.name}
                           </h3>
-                          {item.scheduleDate && !unlocked ? (
+                          {isCompleted ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 border border-blue-200 text-blue-700">
+                              <CheckCircle2 size={12} /> Completed ({item.latestAttempt?.percentage ?? 0}%)
+                            </span>
+                          ) : item.scheduleDate && !unlocked ? (
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-50 border border-amber-200 text-amber-700">
                               <Calendar size={12} /> Scheduled
                             </span>
@@ -180,21 +212,51 @@ export default function Dashboard() {
                           {item.duration || 45} mins
                         </p>
 
-                        {item.scheduleDate && (
+                        {isCompleted && item.latestAttempt ? (
                           <p className="text-xs text-slate-500 flex items-center gap-1.5 pt-0.5">
                             <Clock size={13} className="text-slate-400" />
                             <span>
-                              {unlocked ? "Started: " : "Scheduled for: "}
+                              Completed on:{" "}
                               <strong className="text-slate-700 font-semibold">
-                                {formatSchedule(item.scheduleDate)}
+                                {new Date(
+                                  item.latestAttempt.completedAt ||
+                                    item.latestAttempt.createdAt
+                                ).toLocaleString()}
+                              </strong>{" "}
+                              • Score:{" "}
+                              <strong className="text-blue-700 font-semibold">
+                                {item.latestAttempt.correctCount}/
+                                {item.latestAttempt.totalQuestions} (
+                                {item.latestAttempt.percentage}%)
                               </strong>
                             </span>
                           </p>
+                        ) : (
+                          item.scheduleDate && (
+                            <p className="text-xs text-slate-500 flex items-center gap-1.5 pt-0.5">
+                              <Clock size={13} className="text-slate-400" />
+                              <span>
+                                {unlocked ? "Started: " : "Scheduled for: "}
+                                <strong className="text-slate-700 font-semibold">
+                                  {formatSchedule(item.scheduleDate)}
+                                </strong>
+                              </span>
+                            </p>
+                          )
                         )}
                       </div>
 
                       <div>
-                        {unlocked ? (
+                        {isCompleted ? (
+                          <button
+                            onClick={() =>
+                              viewAttemptResult(item.latestAttempt?.id)
+                            }
+                            className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 flex items-center gap-2 transition cursor-pointer shadow-sm"
+                          >
+                            <Eye size={15} /> View Result
+                          </button>
+                        ) : unlocked ? (
                           <button
                             onClick={() => startAssignedTest(item)}
                             className="glass-btn px-6 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2"
@@ -232,9 +294,14 @@ export default function Dashboard() {
                   key={attempt.id}
                   title={attempt.Assessment?.name || "Assessment"}
                   level={attempt.Assessment?.difficulty || "—"}
-                  topic={attempt.Assessment?.topic || attempt.Assessment?.skills || "—"}
+                  topic={
+                    attempt.Assessment?.topic ||
+                    attempt.Assessment?.skills ||
+                    "—"
+                  }
                   score={`${attempt.correctCount}/${attempt.totalQuestions}`}
                   percent={`${attempt.percentage}%`}
+                  onClick={() => viewAttemptResult(attempt.id)}
                 />
               ))
             )}

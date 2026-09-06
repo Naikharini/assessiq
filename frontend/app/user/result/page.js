@@ -57,8 +57,19 @@ export default function ResultPage() {
             </p>
 
             <p className="text-gray-600 mt-2">
-              {attempt.assessment?.skill} • {attempt.assessment?.topic} •{" "}
-              {attempt.assessment?.difficulty}
+              {attempt.assessment?.skill ||
+                attempt.Assessment?.skills ||
+                attempt.assessment?.name ||
+                attempt.Assessment?.name ||
+                "Skill Assessment"}{" "}
+              •{" "}
+              {attempt.assessment?.topic ||
+                attempt.Assessment?.topic ||
+                "General"}{" "}
+              •{" "}
+              {attempt.assessment?.difficulty ||
+                attempt.Assessment?.difficulty ||
+                "Standard"}
             </p>
 
             <div className="flex justify-center gap-4 mt-8">

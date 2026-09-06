@@ -60,8 +60,45 @@ exports.submitAttempt = async (req, res) => {
       });
     }
 
+    // Guard against duplicate submission for already completed assessment
+    const existingAttempt = await AssessmentAttempt.findOne({
+      where: {
+        userId,
+        assessmentId,
+        status: "completed",
+      },
+    });
+
     const questions = assessment.questions || [];
     const result = scoreAnswers(questions, answers || {});
+
+    const user = await User.findByPk(userId, {
+      attributes: ["id", "fullName", "email"],
+    });
+
+    if (existingAttempt) {
+      return res.status(200).json({
+        success: true,
+        alreadySubmitted: true,
+        attempt: {
+          id: existingAttempt.id,
+          score: existingAttempt.score,
+          correctCount: existingAttempt.correctCount,
+          totalQuestions: existingAttempt.totalQuestions,
+          percentage: existingAttempt.percentage,
+          details: result.details,
+          assessment: {
+            id: assessment.id,
+            name: assessment.name,
+            skill: assessment.skills || assessment.jobRole,
+            topic: assessment.topic,
+            difficulty: assessment.difficulty,
+            duration: assessment.duration,
+          },
+          user,
+        },
+      });
+    }
 
     const attempt = await AssessmentAttempt.create({
       userId,
@@ -73,10 +110,6 @@ exports.submitAttempt = async (req, res) => {
       percentage: result.percentage,
       status: "completed",
       completedAt: new Date(),
-    });
-
-    const user = await User.findByPk(userId, {
-      attributes: ["id", "fullName", "email"],
     });
 
     return res.status(201).json({
@@ -188,6 +221,16 @@ exports.getAttemptById = async (req, res) => {
       attempt: {
         ...attempt.toJSON(),
         details: result.details,
+        assessment: assessment
+          ? {
+              id: assessment.id,
+              name: assessment.name,
+              skill: assessment.skills || assessment.jobRole,
+              topic: assessment.topic,
+              difficulty: assessment.difficulty,
+              duration: assessment.duration,
+            }
+          : null,
       },
     });
   } catch (error) {
@@ -210,6 +253,27 @@ exports.getAssessmentForTest = async (req, res) => {
         success: false,
         message: "Assessment not found",
       });
+    }
+
+    // Check if candidate has already completed this assessment
+    if (req.user?.role !== "admin") {
+      const completedAttempt = await AssessmentAttempt.findOne({
+        where: {
+          userId: req.user.id,
+          assessmentId: assessment.id,
+          status: "completed",
+        },
+        order: [["createdAt", "DESC"]],
+      });
+
+      if (completedAttempt) {
+        return res.status(400).json({
+          success: false,
+          alreadyCompleted: true,
+          attemptId: completedAttempt.id,
+          message: "You have already completed this assessment.",
+        });
+      }
     }
 
     // Check if scheduled in future for non-admin candidate
